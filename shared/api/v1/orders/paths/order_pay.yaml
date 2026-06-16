@@ -1,0 +1,45 @@
+parameters:
+  - $ref: ../params/order_uuid.yaml
+
+post:
+  tags:
+    - orders
+  summary: Makes payment for a previously created order.
+  description: >
+    Находит заказ по `order_uuid`. Если не существует — возвращает 404 Not Found.
+    Вызывает `PaymentService.PayOrder`, передаёт `user_uuid`, `order_uuid` и `payment_method`. Получает`transaction_uuid`.
+    Обновляет заказ: статус → `PAID`, сохраняет `transaction_uuid`, `payment_method`.
+  operationId: payOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/pay_order_request.yaml
+  responses:
+    '200':
+      description: Order was found and paid.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/pay_order_response.yaml
+    '404':
+      description: Order not found
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
+    '500':
+      description: Internal serves error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/internal_server_error.yaml
+    default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/generic_error.yaml
+
+ 

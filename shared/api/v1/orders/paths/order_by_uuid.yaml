@@ -1,0 +1,38 @@
+parameters:
+  - $ref: ../params/order_uuid.yaml
+
+get:
+  tags:
+    - orders
+  summary: Get order by uuid.
+  desciption: >
+    Searches for an order by UUID.
+    If found, returns it.
+    If not found, returns 404 Not Found.
+  operationId: getOrder
+  responses:
+    '200':
+      description: Full order information.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/get_order_response.yaml
+    '404':
+      description: Order not found
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
+    '500':
+      description: Internal serves error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/internal_server_error.yaml
+    default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/generic_error.yaml
+

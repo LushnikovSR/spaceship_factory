@@ -1,0 +1,12 @@
+type: object
+properties:
+  code:
+    type: integer
+    description: HTTP-code error
+    example: 400
+  message:
+    type: string
+    description: Description of error
+required:
+  - code
+  - message

@@ -1,0 +1,15 @@
+type: object
+properties:
+  user_uuid:
+    type: string
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  part_uuids:
+    type: array
+    items: 
+      type: string
+    example:
+      - "321e4567-e89b-12d3-a456-426614174000"
+      - "654e4567-e89b-12d3-a456-426614174000"
+required:
+  - user_uuid
+  - part_uuids

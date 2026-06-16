@@ -1,0 +1,52 @@
+post:
+  tags:
+    - orders
+  summary: Create order by uuid.
+  description: >
+    Получает детали через `InventoryService.ListParts`.
+    Проверяет, что все детали существуют. Если хотя бы одной нет — возвращает ошибку.
+    Считает `total_price`.
+    Генерирует `order_uuid`.
+    Сохраняет заказ со статусом `PENDING_PAYMENT`.
+  operationId: createOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/create_order_request.yaml
+  responses:
+    '201':
+      description: Order was successfully created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/create_order_response.yaml
+    '404':
+      description: Object not found.
+      content: 
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
+    '409':
+      description: Conflict operations error.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/conflict_error.yaml
+    '500':
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/internal_server_error.yaml
+    default:
+      description: Unknown error.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/generic_error.yaml
+
+    
+    
+

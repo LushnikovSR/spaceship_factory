@@ -1,0 +1,54 @@
+parameters:
+  - $ref: ../params/order_uuid.yaml
+
+post:
+  tags:
+    - orders
+  summary: Cancel order by uuid.
+  description: >
+    Checks the order status.
+    If `PENDING_PAYMENT`, changes the status to `CANCELLED`.
+    If `PAID`, returns a 409 error.
+  operationId: cancelOrder
+  responses:
+    '204': 
+      description: Order successfully cancelled
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/bad_request_error.yaml
+      example:
+        code: 400
+        message: "The order has already been cancelled. Cancellation is not possible again."
+    '404':
+      description: Order not found
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
+      example:
+        code: 404
+        message: "Order for uuid '123e4567-e89b-12d3-a456-426614174000' not found"
+    '409':
+      description: Order already paid, cannot be cancelled
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/conflict_error.yaml
+      example:
+        code: 409
+        message: "Order with uuid '123e4567-e89b-12d3-a456-426614174000' is already paid"
+    '500':
+      desription: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/internal_server_error.yaml
+    default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/generic_error.yaml

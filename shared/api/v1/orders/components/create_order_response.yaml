@@ -1,0 +1,13 @@
+type: object
+properties:
+  order_uuid:
+    type: string
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  total_price:
+    type: number
+    description: Total coast of all parts in the order.
+    format: double 
+    example: 123.45
+required:
+  - order_uuid
+  - total_price

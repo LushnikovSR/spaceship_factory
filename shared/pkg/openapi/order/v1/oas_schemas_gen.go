@@ -41,6 +41,7 @@ func (s *BadRequestError) SetMessage(val string) {
 }
 
 func (*BadRequestError) cancelOrderRes() {}
+func (*BadRequestError) createOrderRes() {}
 
 // CancelOrderNoContent is response for CancelOrder operation.
 type CancelOrderNoContent struct{}

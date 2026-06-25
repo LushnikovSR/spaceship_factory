@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+//The order payment service simulates the operation of a payment gateway. Contains an API for working with payment methods
+package payment.v1;
+
+option go_package = "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/payment/v1;payment_v1";
+
+//PaymentService provides an API for working with order payment
+service PaymentService {
+  //PayOrder processes the payment command and returns `transaction_uuid`
+  rpc PayOrder(PayOrderRequest) returns (PayOrderResponse);
+}
+
+//PaymentMethod contains a list of possible payment methods
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  PAYMENT_METHOD_CARD = 1;
+  PAYMENT_METHOD_SBP = 2;
+  PAYMENT_METHOD_CREDIT_CARD = 3;
+  PAYMENT_METHOD_INVESTOR_MONEY = 4;
+}
+
+//PayOrderRequest request for payment for an order
+message PayOrderRequest {
+  //uuid unique order identifier
+  string order_uuid = 1;
+
+  //uuid is the unique identifier of the user who initiates the payment
+  string user_uuid = 2;
+
+  //payment_method is the selected payment method for the order
+  PaymentMethod payment_method = 3;
+}
+
+//PayOrderResponse response to a request for payment of an order
+message PayOrderResponse {
+  //transaction_uuid is a unique identifier of a payment transaction.
+  string transaction_uuid = 1;
+}

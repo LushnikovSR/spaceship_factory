@@ -9,15 +9,14 @@ x-ogen:
   clean: true
 
 servers:
-  - url: '{protocol}://api/{version}'
+  - url: '{protocol}://api/v1'
     variables:
       protocol:
         enum:
           - http
           - https
         default: http
-      version:
-        default: v1
+
 
 tags:
   - name: orders

@@ -1,7 +1,9 @@
-go 1.24.9
+go 1.26.4
 
 use (
+	./internal/middleware
 	./inventory
 	./order
 	./payment
+	./shared
 )

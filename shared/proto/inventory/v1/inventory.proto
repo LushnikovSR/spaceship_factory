@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+//InventoryService responsible for storing and providing information about parts
+package inventory.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1;inventory_v1";
+
+//InventoryService provides an API for working with part`s data
+service InventoryService {
+  //GetParts returns information about a part by its uuid
+  rpc GetPart(GetPartRequest) returns (GetPartResponse);
+
+  //ListParts returns a filterable list of parts
+  rpc ListParts(ListPartsRequest) returns (ListPartsResponse);
+}
+
+//PartsFilter contains fields for filtering. 
+//If field is empty means no filtering by field. 
+//(All fields are optional)
+message PartsFilter {
+  //List of UUIDs (optional)
+  repeated string uuids = 1;
+
+  //List of names (optional)
+  repeated string names = 2;
+
+  //List of categories (optional)
+  repeated Category categories = 3;
+
+  //List of manufacturing countries (optional)
+  repeated string manufacturer_countries = 4;
+
+  //List of tags (optional)
+  repeated string tags = 5;
+}
+
+//Category contains a list of possible categories 
+enum Category {
+  CATEGORY_UNSPECIFIED = 0;
+  CATEGORY_ENGINE = 1;
+  CATEGORY_FUEL = 2;
+  CATEGORY_PORTHOLE = 3;
+  CATEGORY_WING = 4;
+}
+
+//Dimensions provides complete information about the dimension
+message Dimensions {
+  //Length in cm
+  double length = 1;
+
+  //Width in cm
+  double width = 2;
+
+  //Height in cm
+  double height = 3;
+
+  //Weight in kg
+  double weight = 4;
+}
+
+//Manufacturer provides complete information about the manufacturer
+message Manufacturer {
+  //Name
+  string name = 1;
+
+  //Country of origin
+  string country = 2;
+
+  //Manufacturer's website
+  string website = 3;
+}
+
+//Value provides complete information about the
+message Value {
+  oneof data_type {
+    //String value
+    string string_value = 1;
+
+    //Integer value
+    int64 int64_value = 2;
+
+    //Fractional value
+    double double_value = 3;
+
+    //Logical value
+    bool bool_value = 4;
+  }
+}
+
+//Part provides complete information about the part
+message Part {
+  //uuid unique part identifier
+  string uuid = 1;
+
+  //name of part
+  string name = 2;
+
+  //description of part
+  string description = 3;
+
+  //unit price
+  double price = 4;
+
+  //quantity in stock
+  int64 stock_quantity = 5;
+
+  //category
+  Category category = 6;
+
+  //dimensions of the part
+  Dimensions dimensions = 7;
+
+  //information about the manufacturer
+  Manufacturer manufacturer = 8;
+
+  //tags for quick search
+  repeated string tags = 9;
+
+  //flexible metadata
+  map<string, Value> metadata = 10;
+
+  //date of creation
+  google.protobuf.Timestamp created_at = 11;
+
+  //date of updation
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+//GetPartsRequest request for information about a part
+message GetPartRequest {
+  //Part uuid
+  string uuid = 1;
+}
+
+//GetPartPesponse response to a request for information about a part  
+message GetPartResponse {
+  //Part`s data
+  Part part = 1;
+}
+
+//ListPartsRequest requests a list of parts with filtering options
+message ListPartsRequest {
+  //Filter by details (optional) (all fields are optional)
+  PartsFilter filter = 1;
+}
+
+//ListPartsResponse response to a request for a parts list
+message ListPartsResponse {
+  //List of found parts
+  repeated Part parts = 1;
+}

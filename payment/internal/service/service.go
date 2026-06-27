@@ -1,7 +1,9 @@
 package payment
 
-import ()
+import (
+	"context"
+)
 
 type PaymentServise interface {
-	PayOrder(_ context.Context, req *payment_v1.PayOrderRequest) (*payment_v1.PayOrderResponse, error)
+	PayOrder(_ context.Context, orderID string, userID string, paymentMethod int32) (string, error)
 }

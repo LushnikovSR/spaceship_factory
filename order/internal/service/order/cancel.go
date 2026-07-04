@@ -27,7 +27,7 @@ func (s *service) CancelOrder(ctx context.Context, uuid string) error {
 		return &model.ConflictError{
 			BaseError: model.BaseError{
 				Code:    409,
-				Message: "The order has been paid. Cancellation is not possible.",
+				Message: "The order '" + uuid + "' has been paid. Cancellation is not possible.",
 			},
 		}
 	}
@@ -36,7 +36,7 @@ func (s *service) CancelOrder(ctx context.Context, uuid string) error {
 		return &model.BadRequestError{
 			BaseError: model.BaseError{
 				Code:    400,
-				Message: "The order has already been cancelled. Cancellation is not possible again.",
+				Message: "The order '" + uuid + "' has already been cancelled. Cancellation is not possible again.",
 			},
 		}
 	}

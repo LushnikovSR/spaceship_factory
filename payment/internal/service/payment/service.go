@@ -4,7 +4,7 @@ import (
 	def "github.com/LushnikovSR/spaceship_factory/payment/internal/service"
 )
 
-var _ def.PaymentServise = (*service)(nil)
+var _ def.PaymentService = (*service)(nil)
 
 type service struct {
 }

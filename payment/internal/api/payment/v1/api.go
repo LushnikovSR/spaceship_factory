@@ -8,10 +8,10 @@ import (
 type api struct {
 	payment_v1.UnimplementedPaymentServiceServer
 
-	paymentService service.PaymentServise
+	paymentService service.PaymentService
 }
 
-func NewAPI(paymentService service.PaymentServise) *api {
+func NewAPI(paymentService service.PaymentService) *api {
 	return &api{
 		paymentService: paymentService,
 	}

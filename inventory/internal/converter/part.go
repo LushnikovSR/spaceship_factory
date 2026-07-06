@@ -11,26 +11,45 @@ func ModelToProto(inmodel *model.Part) *inventory_v1.Part {
 	if inmodel == nil {
 		return nil
 	}
-	metadata := make(map[string]*inventory_v1.Value, len(inmodel.Metadata))
-	for k, v := range inmodel.Metadata {
-		metadata[k] = RepoValueToModelValue(v)
+
+	// Обрабатываем Metadata: если nil, то и в результате nil
+	var metadata map[string]*inventory_v1.Value
+	if inmodel.Metadata != nil {
+		metadata = make(map[string]*inventory_v1.Value, len(inmodel.Metadata))
+		for k, v := range inmodel.Metadata {
+			metadata[k] = RepoValueToModelValue(v)
+		}
 	}
 
-	dimensions := &inventory_v1.Dimensions{
-		Length: inmodel.Dimensions.Length,
-		Width:  inmodel.Dimensions.Width,
-		Height: inmodel.Dimensions.Height,
-		Weight: inmodel.Dimensions.Weight,
+	// Если Dimensions == nil, оставляем поле nil
+	var dimensions *inventory_v1.Dimensions
+	if inmodel.Dimensions != nil {
+		dimensions = &inventory_v1.Dimensions{
+			Length: inmodel.Dimensions.Length,
+			Width:  inmodel.Dimensions.Width,
+			Height: inmodel.Dimensions.Height,
+			Weight: inmodel.Dimensions.Weight,
+		}
 	}
 
-	manufacturer := &inventory_v1.Manufacturer{
-		Name:    inmodel.Manufacturer.Name,
-		Country: inmodel.Manufacturer.Country,
-		Website: inmodel.Manufacturer.Website,
+	// Если Manufacturer == nil, оставляем поле nil
+	var manufacturer *inventory_v1.Manufacturer
+	if inmodel.Manufacturer != nil {
+		manufacturer = &inventory_v1.Manufacturer{
+			Name:    inmodel.Manufacturer.Name,
+			Country: inmodel.Manufacturer.Country,
+			Website: inmodel.Manufacturer.Website,
+		}
 	}
 
-	createdAt := timestamppb.New(*inmodel.CreatedAt)
-	updatedAt := timestamppb.New(*inmodel.UpdatedAt)
+	// Если временные метки nil, оставляем поля nil
+	var createdAt, updatedAt *timestamppb.Timestamp
+	if inmodel.CreatedAt != nil {
+		createdAt = timestamppb.New(*inmodel.CreatedAt)
+	}
+	if inmodel.UpdatedAt != nil {
+		updatedAt = timestamppb.New(*inmodel.UpdatedAt)
+	}
 
 	return &inventory_v1.Part{
 		Uuid:          inmodel.UUID,
@@ -67,6 +86,10 @@ func RepoValueToModelValue(v *model.Value) *inventory_v1.Value {
 }
 
 func RequestToModelPart(req *inventory_v1.ListPartsRequest) *model.PartsFilter {
+	if req == nil {
+		return nil
+	}
+
 	categories := make([]model.Category, 0, len(req.Filter.Categories))
 
 	for _, category := range req.Filter.Categories {
@@ -83,6 +106,10 @@ func RequestToModelPart(req *inventory_v1.ListPartsRequest) *model.PartsFilter {
 }
 
 func ModelListPartsToProto(inParts []*inventory.Part) []*inventory_v1.Part {
+	if inParts == nil {
+		return nil
+	}
+
 	parts := make([]*inventory_v1.Part, 0, len(inParts))
 
 	for _, part := range inParts {

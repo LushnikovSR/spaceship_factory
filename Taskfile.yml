@@ -323,8 +323,11 @@ tasks:
         echo "📦 Склеиваем все покрытия..."
         {
           echo "mode: atomic"
-          find {{.COVERAGE_DIR}} -type f -name '*.out' ! -name '{{.COVERAGE_FILE}}' \
-            -exec grep -h -v "^mode:" {} +
+          for file in {{.COVERAGE_DIR}}/*.out; do
+            if [ "$(basename "$file")" != "{{.COVERAGE_FILE}}" ]; then
+              grep -h -v "^mode:" "$file"
+            fi
+          done
         } > {{.COVERAGE_DIR}}/{{.COVERAGE_FILE}}
         
         echo

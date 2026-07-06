@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/LushnikovSR/spaceship_factory/internal/middleware v0.0.0-20260627190843-c210485b755f
 	github.com/LushnikovSR/spaceship_factory/shared v0.0.0-20260627190843-c210485b755f
+	github.com/brianvoe/gofakeit/v7 v7.15.0
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-chi/render v1.0.3
 	github.com/go-faster/errors v0.7.1
@@ -15,7 +16,6 @@ require (
 
 require (
 	github.com/ajg/form v1.7.1 // indirect
-	github.com/brianvoe/gofakeit/v7 v7.15.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect

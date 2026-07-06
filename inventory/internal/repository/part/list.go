@@ -118,7 +118,8 @@ func (r *repository) GetParts(uuids []string) []*repoModel.Part {
 		}
 		seen[id] = struct{}{}
 		if part, ok := r.data[id]; ok {
-			parts = append(parts, &part)
+			p := part
+			parts = append(parts, &p)
 		}
 	}
 
@@ -133,7 +134,8 @@ func (r *repository) GetAllParts() []*repoModel.Part {
 	defer r.mu.RUnlock()
 
 	for _, part := range r.data {
-		parts = append(parts, &part)
+		p := part
+		parts = append(parts, &p)
 	}
 
 	return parts

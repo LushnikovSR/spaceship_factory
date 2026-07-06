@@ -10,7 +10,12 @@ func (r *repository) Init() {
 		Price:         1500.0,
 		StockQuantity: 5,
 		Category:      repoModel.Category_CATEGORY_ENGINE,
-		Tags:          []string{"engine", "main"},
+		Manufacturer: &repoModel.Manufacturer{
+			Name:    "Biscuit",
+			Country: "Germany",
+			Website: "financialharness.info",
+		},
+		Tags: []string{"engine", "main"},
 	})
 	r.UpdatePart(&repoModel.Part{
 		UUID:          "22222222-2222-2222-2222-222222222222",
@@ -18,7 +23,21 @@ func (r *repository) Init() {
 		Price:         300.0,
 		StockQuantity: 12,
 		Category:      repoModel.Category_CATEGORY_PORTHOLE,
-		Tags:          []string{"porthole", "window"},
+		Manufacturer: &repoModel.Manufacturer{
+			Name:    "Biscuit",
+			Country: "Germany",
+			Website: "financialharness.info",
+		},
+		Tags: []string{"porthole", "window"},
+	})
+	r.UpdatePart(&repoModel.Part{
+		UUID:          "33333333-3333-3333-3333-333333333333",
+		Name:          "Иллюминатор квадратный",
+		Price:         600.0,
+		StockQuantity: 2,
+		Category:      repoModel.Category_CATEGORY_PORTHOLE,
+		Manufacturer:  nil,
+		Tags:          nil,
 	})
 }
 

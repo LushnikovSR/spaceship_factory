@@ -9,9 +9,14 @@ func RepoModelToModel(inmodel *repoModel.Part) *model.Part {
 	if inmodel == nil {
 		return nil
 	}
-	metadata := make(map[string]*model.Value, len(inmodel.Metadata))
-	for k, v := range inmodel.Metadata {
-		metadata[k] = RepoValueToModelValue(v)
+
+	// Обрабатываем Metadata: если nil, то и в результате nil
+	var metadata map[string]*model.Value
+	if inmodel.Metadata != nil {
+		metadata = make(map[string]*model.Value, len(inmodel.Metadata))
+		for k, v := range inmodel.Metadata {
+			metadata[k] = RepoValueToModelValue(v)
+		}
 	}
 
 	return &model.Part{

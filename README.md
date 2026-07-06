@@ -1,3 +1,5 @@
+[!Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/LushnikovSR/f880a4e63546f454eaa4214babb22376/raw/coverage.json)
+
 # microservices-course-olezhek28
 
 Этот репозиторий содержит проект из курса [Микросервисы, как в BigTech 2.0](https://olezhek28.courses/microservices) от [Олега Козырева](http://t.me/olezhek28go).

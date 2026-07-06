@@ -3,21 +3,22 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
 	"runtime/debug"
 	"syscall"
 
-	apiV1 "github.com/LushnikovSR/spaceship_factory/inventory/internal/api/inventory/v1"
-	repository "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/part"
-	service "github.com/LushnikovSR/spaceship_factory/inventory/internal/service/part"
-	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+
+	apiV1 "github.com/LushnikovSR/spaceship_factory/inventory/internal/api/inventory/v1"
+	repository "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/part"
+	service "github.com/LushnikovSR/spaceship_factory/inventory/internal/service/part"
+	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
 )
 
 const (
@@ -28,7 +29,11 @@ func panicRecoveryInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 		defer func() {
 			if r := recover(); r != nil {
-				log.Printf("PANIC in %s: %v\n%s", info.FullMethod, r, string(debug.Stack()))
+				slog.Error("PANIC",
+					"method", info.FullMethod,
+					"panic", r,
+					"stack", string(debug.Stack()),
+				)
 				err = status.Error(codes.Internal, "internal server error")
 			}
 		}()
@@ -39,14 +44,14 @@ func panicRecoveryInterceptor() grpc.UnaryServerInterceptor {
 func main() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
-		fmt.Printf("failed to listen: %v\n", err)
-		return
+		slog.Error("failed to listen", "error", err)
+		os.Exit(1)
 	}
 
 	defer func() {
 		err := lis.Close()
 		if err != nil {
-			fmt.Printf("failed to close listener: %v\n", err)
+			slog.Error("failed to close listener", "error", err)
 		}
 	}()
 
@@ -55,7 +60,7 @@ func main() {
 		grpc.UnaryInterceptor(panicRecoveryInterceptor()),
 	)
 
-	//Регистрируем Inventory сервис
+	// Регистрируем Inventory сервис
 	repo := repository.NewRepository()
 
 	repo.Init()
@@ -72,16 +77,16 @@ func main() {
 		fmt.Printf("🚀 gRPC server listening on %d\n", grpcPort)
 		err := s.Serve(lis)
 		if err != nil {
-			fmt.Printf("failed to serve: %v\n", err)
-			return
+			slog.Error("failed to serve", "error", err)
+			os.Exit(1)
 		}
 	}()
 
-	//Gracefull shutdown
+	// Gracefull shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("🛑 Shutting down gRPC server...")
+	slog.Info("🛑 Shutting down gRPC server...")
 	s.GracefulStop()
-	log.Println("✅ Server stopped")
+	slog.Info("✅ Server stopped")
 }

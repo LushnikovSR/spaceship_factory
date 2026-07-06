@@ -1,9 +1,10 @@
 package order
 
 import (
-	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/mock"
+
+	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 )
 
 func (s *ServiceSuite) TestPayOrder_Success() {
@@ -49,9 +50,7 @@ func (s *ServiceSuite) TestPayOrder_Success() {
 }
 
 func (s *ServiceSuite) TestPayOrder_RepoError() {
-	var (
-		expectedPaymentMethod = model.PaymentMethodCARD
-	)
+	expectedPaymentMethod := model.PaymentMethodCARD
 
 	s.orderRepository.On("GetOrder", "not-exist").Return(nil).Once()
 

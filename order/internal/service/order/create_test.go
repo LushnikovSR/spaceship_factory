@@ -1,9 +1,10 @@
 package order
 
 import (
-	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/mock"
+
+	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 )
 
 func (s *ServiceSuite) TestCreateOrder_Success() {

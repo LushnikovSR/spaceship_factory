@@ -77,20 +77,29 @@ tasks:
     cmds:
       - |
         echo "🧼 Форматируем через gofumpt ..."
-        
+        shopt -s globstar
         for module in {{.MODULES}}; do
           if [ -d "$module" ]; then
             echo "🧼 Форматируем $module"
-            find $module -type f -name '*.go' ! -path '*/mocks/*' -exec {{.GOFUMPT}} -extra -w {} +
+            for file in $module/**/*.go; do
+              if [ -f "$file" ] && [[ "$file" != */mocks/* ]]; then
+                {{.GOFUMPT}} -extra -w "$file"
+              fi
+            done
           fi
         done
       - |
         echo "🎯 Сортируем импорты через gci ..."
-        
+        shopt -s globstar
         for module in {{.MODULES}}; do
           if [ -d "$module" ]; then
             echo "🎯 Сортируем импорты в $module"
-            find $module -type f -name '*.go' ! -path '*/mocks/*' -exec {{.GCI}} write -s standard -s default -s "prefix(github.com/olezhek28/microservices-course-olezhek-solution)" {} +
+            for file in $module/**/*.go; do
+              if [ -f "$file" ] && [[ "$file" != */mocks/* ]]; then
+                {{.GCI}} write -s standard -s default \
+                  -s "prefix(github.com/LushnikovSR/spaceship_factory)" "$file"
+              fi
+            done
           fi
         done
 

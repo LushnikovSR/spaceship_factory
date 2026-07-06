@@ -3,9 +3,10 @@ package order
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	repoModel "github.com/LushnikovSR/spaceship_factory/order/internal/repository/model"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestOrderModelToRepoModel_NilInput(t *testing.T) {

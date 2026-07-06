@@ -22,7 +22,7 @@ func (_m *PaymentService) EXPECT() *PaymentService_Expecter {
 }
 
 // PayOrder provides a mock function with given fields: _a0, orderID, userID, paymentMethod
-func (_m *PaymentService) PayOrder(_a0 context.Context, orderID string, userID string, paymentMethod int32) (string, error) {
+func (_m *PaymentService) PayOrder(_a0 context.Context, orderID, userID string, paymentMethod int32) (string, error) {
 	ret := _m.Called(_a0, orderID, userID, paymentMethod)
 
 	if len(ret) == 0 {
@@ -59,11 +59,11 @@ type PaymentService_PayOrder_Call struct {
 //   - orderID string
 //   - userID string
 //   - paymentMethod int32
-func (_e *PaymentService_Expecter) PayOrder(_a0 interface{}, orderID interface{}, userID interface{}, paymentMethod interface{}) *PaymentService_PayOrder_Call {
+func (_e *PaymentService_Expecter) PayOrder(_a0, orderID, userID, paymentMethod interface{}) *PaymentService_PayOrder_Call {
 	return &PaymentService_PayOrder_Call{Call: _e.mock.On("PayOrder", _a0, orderID, userID, paymentMethod)}
 }
 
-func (_c *PaymentService_PayOrder_Call) Run(run func(_a0 context.Context, orderID string, userID string, paymentMethod int32)) *PaymentService_PayOrder_Call {
+func (_c *PaymentService_PayOrder_Call) Run(run func(_a0 context.Context, orderID, userID string, paymentMethod int32)) *PaymentService_PayOrder_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(int32))
 	})
@@ -85,7 +85,8 @@ func (_c *PaymentService_PayOrder_Call) RunAndReturn(run func(context.Context, s
 func NewPaymentService(t interface {
 	mock.TestingT
 	Cleanup(func())
-}) *PaymentService {
+},
+) *PaymentService {
 	mock := &PaymentService{}
 	mock.Mock.Test(t)
 

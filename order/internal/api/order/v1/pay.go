@@ -17,7 +17,6 @@ import (
 //
 // POST /orders/{order_uuid}/pay
 func (a *api) PayOrder(ctx context.Context, req *order_v1.PayOrderRequest, params order_v1.PayOrderParams) (order_v1.PayOrderRes, error) {
-
 	transaction_UUID, err := a.orderService.PayOrder(ctx, model.PaymentMethod(req.PaymentMethod), params.OrderUUID)
 	if err != nil {
 		return &order_v1.PayOrderResponse{}, err

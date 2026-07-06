@@ -4,11 +4,12 @@ import (
 	"context"
 	"log"
 
-	model "github.com/LushnikovSR/spaceship_factory/payment/internal/model"
 	"github.com/google/uuid"
+
+	model "github.com/LushnikovSR/spaceship_factory/payment/internal/model"
 )
 
-func (s *service) PayOrder(_ context.Context, orderID string, userID string, paymentMethod int32) (string, error) {
+func (s *service) PayOrder(_ context.Context, orderID, userID string, paymentMethod int32) (string, error) {
 	// 1. Валидация обязательных полей
 	if orderID == "" {
 		return "", model.ErrMissingArgument

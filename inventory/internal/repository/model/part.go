@@ -46,22 +46,22 @@ var (
 )
 
 type Dimensions struct {
-	//Length in cm
+	// Length in cm
 	Length float64
-	//Width in cm
+	// Width in cm
 	Width float64
-	//Height in cm
+	// Height in cm
 	Height float64
-	//Weight in kg
+	// Weight in kg
 	Weight float64
 }
 
 type Manufacturer struct {
-	//Name
+	// Name
 	Name string
-	//Country of origin
+	// Country of origin
 	Country string
-	//Manufacturer's website
+	// Manufacturer's website
 	Website string
 }
 
@@ -80,22 +80,22 @@ type isValue_DataType interface {
 }
 
 type Value_StringValue struct {
-	//String value
+	// String value
 	StringValue string
 }
 
 type Value_Int64Value struct {
-	//Integer value
+	// Integer value
 	Int64Value int64
 }
 
 type Value_DoubleValue struct {
-	//Fractional value
+	// Fractional value
 	DoubleValue float64
 }
 
 type Value_BoolValue struct {
-	//Logical value
+	// Logical value
 	BoolValue bool
 }
 

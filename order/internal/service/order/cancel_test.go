@@ -1,8 +1,9 @@
 package order
 
 import (
-	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	"github.com/brianvoe/gofakeit/v7"
+
+	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 )
 
 func (s *ServiceSuite) TestCancelOrder_Success() {

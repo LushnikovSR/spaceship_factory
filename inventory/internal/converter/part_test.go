@@ -4,11 +4,12 @@ import (
 	"testing"
 	"time"
 
-	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
-	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
+	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
 )
 
 func TestModelToProto_NilInput(t *testing.T) {

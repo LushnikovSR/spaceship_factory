@@ -1,8 +1,9 @@
 package payment
 
 import (
-	model "github.com/LushnikovSR/spaceship_factory/payment/internal/model"
 	"github.com/brianvoe/gofakeit/v7"
+
+	model "github.com/LushnikovSR/spaceship_factory/payment/internal/model"
 )
 
 func (s *ServiceSuite) TestPayOrder_Success() {

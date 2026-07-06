@@ -4,10 +4,11 @@ import (
 	"testing"
 	"time"
 
-	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
-	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/assert"
+
+	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
+	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
 )
 
 func TestRepoModelToModel_NilInput(t *testing.T) {

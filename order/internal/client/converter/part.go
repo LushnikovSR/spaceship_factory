@@ -47,7 +47,7 @@ func PartToModel(part *inventory_v1.Part) model.Part {
 		}
 	}
 
-	//Если Dimensions == nil, оставляем поле nil
+	// Если Dimensions == nil, оставляем поле nil
 	var dimensions *model.Dimensions
 	if part.Dimensions != nil {
 		dimensions = &model.Dimensions{
@@ -58,7 +58,7 @@ func PartToModel(part *inventory_v1.Part) model.Part {
 		}
 	}
 
-	//Если Manufacturer == nil, оставляем поле nil
+	// Если Manufacturer == nil, оставляем поле nil
 	var manufacturer *model.Manufacturer
 	if part.Manufacturer != nil {
 		manufacturer = &model.Manufacturer{
@@ -68,7 +68,7 @@ func PartToModel(part *inventory_v1.Part) model.Part {
 		}
 	}
 
-	//Если createdAt или updatedAt == nil, оставляем nil
+	// Если createdAt или updatedAt == nil, оставляем nil
 	var createdAt, updatedAt *time.Time
 	if part.CreatedAt != nil {
 		temp := part.CreatedAt.AsTime()

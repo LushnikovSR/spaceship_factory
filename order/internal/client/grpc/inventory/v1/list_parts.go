@@ -16,5 +16,4 @@ func (c *client) ListParts(ctx context.Context, filter model.PartsFilter) ([]mod
 		return nil, err
 	}
 	return clientConverter.PartsListToModel(resp.Parts), nil
-
 }

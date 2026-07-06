@@ -1,8 +1,9 @@
 package inventory
 
 import (
-	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 	"github.com/brianvoe/gofakeit/v7"
+
+	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 )
 
 func (s *ServiceSuite) TestListParts_Success() {

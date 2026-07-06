@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/samber/lo"
+
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 	converter "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/converter"
-	"github.com/samber/lo"
 )
 
 func (r *repository) GetPart(_ context.Context, uuid string) (*model.Part, error) {

@@ -11,7 +11,8 @@ import (
 // Получает детали через `InventoryService.ListParts`. Проверяет, что
 // все детали существуют. Если хотя бы одной нет —
 // возвращает ошибку. Считает `total_price`. Генерирует `order_uuid`.
-//  Сохраняет заказ со статусом `PENDING_PAYMENT`.
+//
+//	Сохраняет заказ со статусом `PENDING_PAYMENT`.
 //
 // POST /orders
 func (a *api) CreateOrder(ctx context.Context, req *order_v1.CreateOrderRequest) (order_v1.CreateOrderRes, error) {

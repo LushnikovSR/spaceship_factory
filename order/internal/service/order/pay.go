@@ -16,7 +16,6 @@ import (
 //
 // POST /orders/{order_uuid}/pay
 func (s *service) PayOrder(ctx context.Context, paymentMethod model.PaymentMethod, orderUUID string) (string, error) {
-
 	order := s.orderRepository.GetOrder(orderUUID)
 	if order == nil {
 		return "", &model.NotFoundError{

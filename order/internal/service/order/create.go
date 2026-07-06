@@ -3,9 +3,10 @@ package order
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	repository "github.com/LushnikovSR/spaceship_factory/order/internal/repository"
-	"github.com/google/uuid"
 )
 
 // CreateOrder implements createOrder operation.
@@ -13,7 +14,7 @@ import (
 // Получает детали через `InventoryService.ListParts`. Проверяет, что
 // все детали существуют. Если хотя бы одной нет —
 // возвращает ошибку. Считает `total_price`. Генерирует `order_uuid`.
-//  Сохраняет заказ со статусом `PENDING_PAYMENT`.
+// Сохраняет заказ со статусом `PENDING_PAYMENT`.
 //
 // POST /orders
 func (s *service) CreateOrder(ctx context.Context, userUUID string, partUuids []string) (orderUUID string, totalPrice float64, err error) {
@@ -48,7 +49,7 @@ func (s *service) CreateOrder(ctx context.Context, userUUID string, partUuids []
 	}
 
 	// Считаем total_price
-	var total_price float64 = 0.0
+	total_price := float64(0.0)
 	for _, part := range parts {
 		total_price += part.Price
 	}

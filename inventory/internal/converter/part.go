@@ -1,10 +1,10 @@
 package inventory
 
 import (
-	inventory "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func ModelToProto(inmodel *model.Part) *inventory_v1.Part {
@@ -96,7 +96,7 @@ func RequestToModelPart(req *inventory_v1.ListPartsRequest) *model.PartsFilter {
 		categories = append(categories, model.Category(category))
 	}
 
-	return &inventory.PartsFilter{
+	return &model.PartsFilter{
 		Uuids:                 req.Filter.Uuids,
 		Names:                 req.Filter.Names,
 		Categories:            categories,
@@ -105,7 +105,7 @@ func RequestToModelPart(req *inventory_v1.ListPartsRequest) *model.PartsFilter {
 	}
 }
 
-func ModelListPartsToProto(inParts []*inventory.Part) []*inventory_v1.Part {
+func ModelListPartsToProto(inParts []*model.Part) []*inventory_v1.Part {
 	if inParts == nil {
 		return nil
 	}

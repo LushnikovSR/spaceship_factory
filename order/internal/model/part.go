@@ -2,51 +2,51 @@ package order
 
 import "time"
 
-//PartsFilter contains fields for filtering.
-//If field is empty means no filtering by field.
-//(All fields are optional)
+// PartsFilter contains fields for filtering.
+// If field is empty means no filtering by field.
+// (All fields are optional)
 type PartsFilter struct {
-	//List of UUIDs (optional)
+	// List of UUIDs (optional)
 	Uuids []string
-	//List of names (optional)
+	// List of names (optional)
 	Names []string
-	//List of categories (optional)
+	// List of categories (optional)
 	Categories []Category
-	//List of manufacturing countries (optional)
+	// List of manufacturing countries (optional)
 	ManufacturerCountries []string
-	//List of tags (optional)
+	// List of tags (optional)
 	Tags []string
 }
 
-//Part provides complete information about the part
+// Part provides complete information about the part
 type Part struct {
-	//uuid unique part identifier
+	// uuid unique part identifier
 	Uuid string
-	//name of part
+	// name of part
 	Name string
-	//description of part
+	// description of part
 	Description string
-	//unit price
+	// unit price
 	Price float64
-	//quantity in stock
+	// quantity in stock
 	StockQuantity int64
-	//category
+	// category
 	Category Category
-	//dimensions of the part
+	// dimensions of the part
 	Dimensions *Dimensions
-	//information about the manufacturer
+	// information about the manufacturer
 	Manufacturer *Manufacturer
-	//tags for quick search
+	// tags for quick search
 	Tags []string
-	//flexible metadata
+	// flexible metadata
 	Metadata map[string]*Value
-	//date of creation
+	// date of creation
 	CreatedAt *time.Time
-	//date of updation
+	// date of updation
 	UpdatedAt *time.Time
 }
 
-//Category contains a list of possible categories
+// Category contains a list of possible categories
 type Category int32
 
 const (
@@ -75,29 +75,29 @@ var (
 	}
 )
 
-//Dimensions provides complete information about the dimension
+// Dimensions provides complete information about the dimension
 type Dimensions struct {
-	//Length in cm
+	// Length in cm
 	Length float64
-	//Width in cm
+	// Width in cm
 	Width float64
-	//Height in cm
+	// Height in cm
 	Height float64
-	//Weight in kg
+	// Weight in kg
 	Weight float64
 }
 
-//Manufacturer provides complete information about the manufacturer
+// Manufacturer provides complete information about the manufacturer
 type Manufacturer struct {
-	//Name
+	// Name
 	Name string
-	//Country of origin
+	// Country of origin
 	Country string
-	//Manufacturer's website
+	// Manufacturer's website
 	Website string
 }
 
-//Value provides complete information about the
+// Value provides complete information about the
 type Value struct {
 	// Types that are valid to be assigned to DataType:
 	//
@@ -140,22 +140,22 @@ type isValue_DataType interface {
 }
 
 type Value_StringValue struct {
-	//String value
+	// String value
 	StringValue string
 }
 
 type Value_Int64Value struct {
-	//Integer value
+	// Integer value
 	Int64Value int64
 }
 
 type Value_DoubleValue struct {
-	//Fractional value
+	// Fractional value
 	DoubleValue float64
 }
 
 type Value_BoolValue struct {
-	//Logical value
+	// Logical value
 	BoolValue bool
 }
 

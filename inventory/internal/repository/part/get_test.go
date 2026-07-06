@@ -29,9 +29,8 @@ func (s *RepositorySuite) TestGetPart_Success() {
 }
 
 func (s *RepositorySuite) TestGetPart_NotFoundError() {
-	var (
-		nonExistentPartUUID = "non-existent"
-	)
+	nonExistentPartUUID := "non-existent"
+
 	s.repository.Init()
 
 	part, err := s.repository.GetPart(s.ctx, nonExistentPartUUID)

@@ -13,8 +13,6 @@ func (e *BaseError) Error() string {
 	return fmt.Sprintf("HTTP-code: %d Message: %s", e.Code, e.Message)
 }
 
-func (e *BaseError) cancelOrderRes() {}
-
 type NotFoundError struct {
 	BaseError
 }

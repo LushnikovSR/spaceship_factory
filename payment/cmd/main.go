@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
 	apiV1 "github.com/LushnikovSR/spaceship_factory/payment/internal/api/payment/v1"
 	service "github.com/LushnikovSR/spaceship_factory/payment/internal/service/payment"
 	payment_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/payment/v1"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -22,14 +23,14 @@ const (
 func main() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
-		fmt.Printf("failed to listen: %v\n", err)
-		return
+		slog.Error("failed to listen", "error", err)
+		os.Exit(1)
 	}
 
 	defer func() {
 		err := lis.Close()
 		if err != nil {
-			fmt.Printf("failed to close listener: %v\n", err)
+			slog.Error("failed to close listener", "error", err)
 		}
 	}()
 
@@ -46,11 +47,11 @@ func main() {
 	reflection.Register(s)
 
 	go func() {
-		log.Printf("🚀 gRPC server listening on %d\n", grpcPort)
+		slog.Info("🚀 gRPC server listening", "port", grpcPort)
 		err = s.Serve(lis)
 		if err != nil {
-			log.Printf("failed to serve: %v\n", err)
-			return
+			slog.Error("failed to serve", "error", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -58,7 +59,7 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("🛑 Shutting down gRPC server...")
+	slog.Info("🛑 Shutting down gRPC server...")
 	s.GracefulStop()
-	log.Println("✅ Server stopped")
+	slog.Info("✅ Server stopped")
 }

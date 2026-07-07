@@ -74,7 +74,7 @@ func main() {
 	reflection.Register(s)
 
 	go func() {
-		fmt.Printf("🚀 gRPC server listening on %d\n", grpcPort)
+		slog.Info("🚀 gRPC server listening", "port", grpcPort)
 		err := s.Serve(lis)
 		if err != nil {
 			slog.Error("failed to serve", "error", err)

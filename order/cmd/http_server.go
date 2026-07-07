@@ -123,7 +123,7 @@ func run() error {
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		return fmt.Errorf("Error during server closing: %w", err)
+		return fmt.Errorf("error during server closing: %w", err)
 	}
 	slog.Info("✅ Server stopped")
 	return nil

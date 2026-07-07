@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -55,7 +56,7 @@ func run() error {
 	}
 	defer func() {
 		if cerr := connInv.Close(); cerr != nil {
-			log.Printf("failed to close InventoryService connection: %v", cerr)
+			slog.Error("failed to close InventoryService connection", "error", cerr)
 		}
 	}()
 	invClient := inventory_v1.NewInventoryServiceClient(connInv)
@@ -68,7 +69,7 @@ func run() error {
 	}
 	defer func() {
 		if cerr := connPay.Close(); cerr != nil {
-			log.Printf("failed to close PaymentService connection: %v", cerr)
+			slog.Error("failed to close PaymentService connection", "error", cerr)
 		}
 	}()
 	payClient := payment_v1.NewPaymentServiceClient(connPay)
@@ -107,7 +108,8 @@ func run() error {
 	go func() {
 		log.Printf("Server is starting on port: %s\n", httpPort)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Printf("Starting server is failed: %s\n", err)
+			slog.Error("failed to serve", "error", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -116,13 +118,13 @@ func run() error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Server stopping ...")
+	slog.Info("🛑 Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
 		return fmt.Errorf("Error during server closing: %w", err)
 	}
-	log.Println("Server stopped correctly")
+	slog.Info("✅ Server stopped")
 	return nil
 }

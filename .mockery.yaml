@@ -27,6 +27,6 @@ packages:
     config:
       include-regex: ".*Repository"
 
-  github.com/LushnikovSR/spaceship_factory/order/internal/client:
+  github.com/LushnikovSR/spaceship_factory/order/internal/client/grpc:
     config:
       include-regex: ".*Client"

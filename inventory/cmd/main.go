@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"runtime/debug"
 	"syscall"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -48,23 +49,45 @@ func main() {
 		os.Exit(1)
 	}
 
-	defer func() {
-		err := lis.Close()
-		if err != nil {
-			slog.Error("failed to close listener", "error", err)
-		}
-	}()
+	slog.Info("👂 listener is running and will be closed using grpc.Server.GracefulStop()")
 
 	// Создаем gRPC сервер
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(panicRecoveryInterceptor()),
 	)
 
+	// Подключаемся к mongoDB
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	client, err := repository.ConnectMongo(ctx)
+	if err != nil {
+		slog.Error("failed to connect to MongoDB", "error", err)
+		os.Exit(1)
+	}
+
+	defer func() {
+		cerr := client.Disconnect(context.Background())
+		if cerr != nil {
+			slog.Warn("MongoDB disconnect error", "error", cerr)
+		}
+	}()
+
+	// Проверяем соединение с базой данных
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		slog.Error("failed to ping to database", "error", err)
+		os.Exit(1)
+	}
+
+	// Получаем базу данных
+	db := client.Database("inventory")
+
+	repo := repository.NewRepository(db)
+
+	repo.Init(ctx)
+
 	// Регистрируем Inventory сервис
-	repo := repository.NewRepository()
-
-	repo.Init()
-
 	service := service.NewService(repo)
 	api := apiV1.NewAPI(service)
 

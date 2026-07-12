@@ -1,6 +1,8 @@
 package inventory
 
 import (
+	"context"
+
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 )
 
@@ -8,7 +10,7 @@ func (s *RepositorySuite) TestListParts_FullFilter() {
 	var (
 		partUuids                 = []string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}
 		partNmaes                 = []string{"Сопло маршевое", "Иллюминатор стандартный"}
-		partCategories            = []model.Category{model.Category_CATEGORY_ENGINE, model.Category_CATEGORY_PORTHOLE}
+		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
 		partManufacturerCountries = []string{"Germany"}
 		partTags                  = []string{"engine", "window"}
 
@@ -32,7 +34,7 @@ func (s *RepositorySuite) TestListParts_FullFilter() {
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
@@ -41,13 +43,13 @@ func (s *RepositorySuite) TestListParts_FullFilter() {
 				Name:          "Иллюминатор стандартный",
 				Price:         300.0,
 				StockQuantity: 12,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"porthole", "window"},
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -68,7 +70,7 @@ func (s *RepositorySuite) TestListParts_NillFilter() {
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
@@ -77,7 +79,7 @@ func (s *RepositorySuite) TestListParts_NillFilter() {
 				Name:          "Иллюминатор стандартный",
 				Price:         300.0,
 				StockQuantity: 12,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"porthole", "window"},
 			},
@@ -86,13 +88,13 @@ func (s *RepositorySuite) TestListParts_NillFilter() {
 				Name:          "Иллюминатор квадратный",
 				Price:         600.0,
 				StockQuantity: 2,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  nil,
 				Tags:          nil,
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, nil)
 	s.Require().NoError(err)
@@ -104,7 +106,7 @@ func (s *RepositorySuite) TestListParts_WithNonExistentPartUuidAmongPartUuids() 
 		nonExistentPartUUID       = "non-existent"
 		partUuids                 = []string{"11111111-1111-1111-1111-111111111111", nonExistentPartUUID}
 		partNmaes                 = []string{"Сопло маршевое", "Иллюминатор стандартный"}
-		partCategories            = []model.Category{model.Category_CATEGORY_ENGINE, model.Category_CATEGORY_PORTHOLE}
+		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
 		partManufacturerCountries = []string{"Germany"}
 		partTags                  = []string{"engine", "window"}
 
@@ -128,13 +130,13 @@ func (s *RepositorySuite) TestListParts_WithNonExistentPartUuidAmongPartUuids() 
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -146,7 +148,7 @@ func (s *RepositorySuite) TestListParts_WithNonExistentPartUUID() {
 		nonExistentPartUUID       = "non-existent"
 		partUuids                 = []string{nonExistentPartUUID}
 		partNmaes                 = []string{"Сопло маршевое", "Иллюминатор стандартный"}
-		partCategories            = []model.Category{model.Category_CATEGORY_ENGINE, model.Category_CATEGORY_PORTHOLE}
+		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
 		partManufacturerCountries = []string{"Germany"}
 		partTags                  = []string{"engine", "window"}
 
@@ -158,7 +160,7 @@ func (s *RepositorySuite) TestListParts_WithNonExistentPartUUID() {
 			Tags:                  partTags,
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -170,7 +172,7 @@ func (s *RepositorySuite) TestListParts_WithNonExistentPartName() {
 		nonExistentPartName       = "non-existent"
 		partUuids                 = []string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}
 		partNmaes                 = []string{nonExistentPartName}
-		partCategories            = []model.Category{model.Category_CATEGORY_ENGINE, model.Category_CATEGORY_PORTHOLE}
+		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
 		partManufacturerCountries = []string{"Germany"}
 		partTags                  = []string{"engine", "window"}
 
@@ -182,7 +184,7 @@ func (s *RepositorySuite) TestListParts_WithNonExistentPartName() {
 			Tags:                  partTags,
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -209,7 +211,7 @@ func (s *RepositorySuite) TestListParts_WithOnlyUuidsInFilter() {
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
@@ -218,13 +220,13 @@ func (s *RepositorySuite) TestListParts_WithOnlyUuidsInFilter() {
 				Name:          "Иллюминатор стандартный",
 				Price:         300.0,
 				StockQuantity: 12,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"porthole", "window"},
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -251,13 +253,13 @@ func (s *RepositorySuite) TestListParts_WithDoubleUuidInFilter() {
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -284,7 +286,7 @@ func (s *RepositorySuite) TestListParts_WithOnlyNamesInFilter() {
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
@@ -293,13 +295,13 @@ func (s *RepositorySuite) TestListParts_WithOnlyNamesInFilter() {
 				Name:          "Иллюминатор стандартный",
 				Price:         300.0,
 				StockQuantity: 12,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"porthole", "window"},
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -308,7 +310,7 @@ func (s *RepositorySuite) TestListParts_WithOnlyNamesInFilter() {
 
 func (s *RepositorySuite) TestListParts_WithOnlyCategoriesInFilter() {
 	var (
-		partCategories = []model.Category{model.Category_CATEGORY_ENGINE, model.Category_CATEGORY_PORTHOLE}
+		partCategories = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
 
 		filter = &model.PartsFilter{
 			Categories: partCategories,
@@ -326,7 +328,7 @@ func (s *RepositorySuite) TestListParts_WithOnlyCategoriesInFilter() {
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
@@ -335,7 +337,7 @@ func (s *RepositorySuite) TestListParts_WithOnlyCategoriesInFilter() {
 				Name:          "Иллюминатор стандартный",
 				Price:         300.0,
 				StockQuantity: 12,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"porthole", "window"},
 			},
@@ -344,13 +346,13 @@ func (s *RepositorySuite) TestListParts_WithOnlyCategoriesInFilter() {
 				Name:          "Иллюминатор квадратный",
 				Price:         600.0,
 				StockQuantity: 2,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  nil,
 				Tags:          nil,
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -377,7 +379,7 @@ func (s *RepositorySuite) TestListParts_WithOnlyManufacturerCountriesInFilter() 
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
@@ -386,13 +388,13 @@ func (s *RepositorySuite) TestListParts_WithOnlyManufacturerCountriesInFilter() 
 				Name:          "Иллюминатор стандартный",
 				Price:         300.0,
 				StockQuantity: 12,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"porthole", "window"},
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	s.Require().NoError(err)
@@ -419,7 +421,7 @@ func (s *RepositorySuite) TestListParts_WithOnlyTagsInFilter() {
 				Name:          "Сопло маршевое",
 				Price:         1500.0,
 				StockQuantity: 5,
-				Category:      model.Category_CATEGORY_ENGINE,
+				Category:      model.CATEGORY_ENGINE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"engine", "main"},
 			},
@@ -428,13 +430,13 @@ func (s *RepositorySuite) TestListParts_WithOnlyTagsInFilter() {
 				Name:          "Иллюминатор стандартный",
 				Price:         300.0,
 				StockQuantity: 12,
-				Category:      model.Category_CATEGORY_PORTHOLE,
+				Category:      model.CATEGORY_PORTHOLE,
 				Manufacturer:  manufacturer,
 				Tags:          []string{"porthole", "window"},
 			},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	parts, err := s.repository.ListParts(s.ctx, filter)
 	println(parts)

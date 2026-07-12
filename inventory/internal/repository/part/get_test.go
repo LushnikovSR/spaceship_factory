@@ -1,6 +1,8 @@
 package inventory
 
 import (
+	"context"
+
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 )
 
@@ -12,7 +14,7 @@ func (s *RepositorySuite) TestGetPart_Success() {
 			Name:          "Сопло маршевое",
 			Price:         1500.0,
 			StockQuantity: 5,
-			Category:      model.Category_CATEGORY_ENGINE,
+			Category:      model.CATEGORY_ENGINE,
 			Manufacturer: &model.Manufacturer{
 				Name:    "Biscuit",
 				Country: "Germany",
@@ -21,7 +23,7 @@ func (s *RepositorySuite) TestGetPart_Success() {
 			Tags: []string{"engine", "main"},
 		}
 	)
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	part, err := s.repository.GetPart(s.ctx, existedPartUUID)
 	s.Require().NoError(err)
@@ -31,7 +33,7 @@ func (s *RepositorySuite) TestGetPart_Success() {
 func (s *RepositorySuite) TestGetPart_NotFoundError() {
 	nonExistentPartUUID := "non-existent"
 
-	s.repository.Init()
+	s.repository.Init(context.Background())
 
 	part, err := s.repository.GetPart(s.ctx, nonExistentPartUUID)
 	s.Require().Error(err)

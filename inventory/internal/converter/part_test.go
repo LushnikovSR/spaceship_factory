@@ -48,7 +48,7 @@ func TestModelToProto_FullDataSuccess(t *testing.T) {
 			Description:   partDescription,
 			Price:         partPrice,
 			StockQuantity: int64(partStockQuantity),
-			Category:      model.Category_CATEGORY_ENGINE,
+			Category:      model.CATEGORY_ENGINE,
 			Dimensions:    &model.Dimensions{Length: length, Width: width, Height: height, Weight: weight},
 			Manufacturer:  &model.Manufacturer{Name: manufacurerName, Country: manufacurerCountry, Website: manufacturerWebsite},
 			Tags:          partTags,
@@ -105,7 +105,7 @@ func TestRequestToModelPart_Success(t *testing.T) {
 			Filter: filter,
 		}
 
-		partModelCategories = []model.Category{model.Category_CATEGORY_ENGINE, model.Category_CATEGORY_PORTHOLE}
+		partModelCategories = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
 
 		expectedPartsFilter = &model.PartsFilter{
 			Uuids:                 partUuids,

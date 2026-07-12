@@ -1,54 +1,67 @@
 package inventory
 
 import (
+	"log/slog"
+
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
 )
 
-func RepoModelToModel(inmodel *repoModel.Part) *model.Part {
-	if inmodel == nil {
-		return nil
-	}
-
+func RepoModelToModel(part repoModel.Part) *model.Part {
 	// Обрабатываем Metadata: если nil, то и в результате nil
 	var metadata map[string]*model.Value
-	if inmodel.Metadata != nil {
-		metadata = make(map[string]*model.Value, len(inmodel.Metadata))
-		for k, v := range inmodel.Metadata {
+	if part.Metadata != nil {
+		metadata = make(map[string]*model.Value, len(part.Metadata))
+		for k, v := range part.Metadata {
 			metadata[k] = RepoValueToModelValue(v)
 		}
 	}
 
 	return &model.Part{
-		UUID:          inmodel.UUID,
-		Name:          inmodel.Name,
-		Description:   inmodel.Description,
-		Price:         inmodel.Price,
-		StockQuantity: inmodel.StockQuantity,
-		Category:      model.Category(inmodel.Category),
-		Dimensions:    (*model.Dimensions)(inmodel.Dimensions),
-		Manufacturer:  (*model.Manufacturer)(inmodel.Manufacturer),
-		Tags:          inmodel.Tags,
+		UUID:          part.ID.Hex(),
+		Name:          part.Name,
+		Description:   part.Description,
+		Price:         part.Price,
+		StockQuantity: part.StockQuantity,
+		Category:      model.Category(part.Category),
+		Dimensions:    (*model.Dimensions)(part.Dimensions),
+		Manufacturer:  (*model.Manufacturer)(part.Manufacturer),
+		Tags:          part.Tags,
 		Metadata:      metadata,
-		CreatedAt:     inmodel.CreatedAt,
-		UpdatedAt:     inmodel.UpdatedAt,
+		CreatedAt:     &part.CreatedAt,
+		UpdatedAt:     &part.UpdatedAt,
 	}
 }
 
-func RepoValueToModelValue(v *repoModel.Value) *model.Value {
+// RepoValueToModelValue конвертирует значение, прочитанное из MongoDB (map[string]interface{}),
+// в типизированное представление model.Value.
+func RepoValueToModelValue(v any) *model.Value {
 	if v == nil {
 		return nil
 	}
 	mv := &model.Value{}
-	switch data := v.DataType.(type) {
-	case *repoModel.Value_StringValue:
-		mv.DataType = &model.Value_StringValue{StringValue: data.StringValue}
-	case *repoModel.Value_Int64Value:
-		mv.DataType = &model.Value_Int64Value{Int64Value: data.Int64Value}
-	case *repoModel.Value_DoubleValue:
-		mv.DataType = &model.Value_DoubleValue{DoubleValue: data.DoubleValue}
-	case *repoModel.Value_BoolValue:
-		mv.DataType = &model.Value_BoolValue{BoolValue: data.BoolValue}
+	switch val := v.(type) {
+	case string:
+		mv.DataType = &model.Value_StringValue{StringValue: val}
+	case int64:
+		mv.DataType = &model.Value_Int64Value{Int64Value: val}
+	case float64:
+		mv.DataType = &model.Value_DoubleValue{DoubleValue: val}
+	case bool:
+		mv.DataType = &model.Value_BoolValue{BoolValue: val}
+	default:
+		// неизвестный тип — оставляем nil
+		slog.Warn("failed to convert to model.Value")
+		return nil
 	}
 	return mv
+}
+
+func ToModelParts(repoParts []repoModel.Part) []*model.Part {
+	parts := make([]*model.Part, 0, len(repoParts))
+	for _, repoPart := range repoParts {
+		part := RepoModelToModel(repoPart)
+		parts = append(parts, part)
+	}
+	return parts
 }

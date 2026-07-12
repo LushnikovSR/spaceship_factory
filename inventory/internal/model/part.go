@@ -20,11 +20,11 @@ type Part struct {
 type Category int32
 
 const (
-	Category_CATEGORY_UNSPECIFIED Category = 0
-	Category_CATEGORY_ENGINE      Category = 1
-	Category_CATEGORY_FUEL        Category = 2
-	Category_CATEGORY_PORTHOLE    Category = 3
-	Category_CATEGORY_WING        Category = 4
+	CATEGORY_UNSPECIFIED Category = 0
+	CATEGORY_ENGINE      Category = 1
+	CATEGORY_FUEL        Category = 2
+	CATEGORY_PORTHOLE    Category = 3
+	CATEGORY_WING        Category = 4
 )
 
 // Enum value maps for Category.

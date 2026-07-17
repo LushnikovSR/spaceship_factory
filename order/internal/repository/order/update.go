@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"log/slog"
 
+	sq "github.com/Masterminds/squirrel"
+
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	converter "github.com/LushnikovSR/spaceship_factory/order/internal/repository/converter"
-	sq "github.com/Masterminds/squirrel"
 )
 
 // UpdateOrder обновляет данные о заказе для указанного заказа.

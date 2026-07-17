@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"fmt"
 
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 )
@@ -45,7 +46,15 @@ func (s *service) CancelOrder(ctx context.Context, uuid string) error {
 	}
 
 	order.SetStatus(model.OrderDtoStatusCANCELLED)
-	s.orderRepository.UpdateOrder(ctx, order)
+	err = s.orderRepository.UpdateOrder(ctx, order)
+	if err != nil {
+		return &model.InternalServerError{
+			BaseError: model.BaseError{
+				Code:    500,
+				Message: fmt.Errorf("The order status wasn`t update to CANCELLED: %w", err).Error(),
+			},
+		}
+	}
 
 	return nil
 }

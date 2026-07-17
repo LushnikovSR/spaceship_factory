@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"errors"
 
 	converter "github.com/LushnikovSR/spaceship_factory/order/internal/converter"
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
@@ -16,24 +17,29 @@ import (
 func (a *api) GetOrder(ctx context.Context, params order_v1.GetOrderParams) (order_v1.GetOrderRes, error) {
 	order, err := a.orderService.GetOrder(ctx, params.OrderUUID)
 	if err != nil {
-		// Конвертируем внутреннюю ошибку в соответствующий тип ответа
-		switch e := err.(type) {
-		case *model.NotFoundError:
+		// Проверяем известные типы ошибок с учётом возможных обёрток
+		var notFoundErr *model.NotFoundError
+		if errors.As(err, &notFoundErr) {
 			return &order_v1.NotFoundError{
-				Code:    e.Code,
-				Message: e.Message,
-			}, nil
-		case *model.InternalServerError:
-			return &order_v1.InternalServerError{
-				Code:    e.Code,
-				Message: e.Message,
-			}, nil
-		default:
-			return &order_v1.InternalServerError{
-				Code:    500,
-				Message: err.Error(),
+				Code:    notFoundErr.Code,
+				Message: notFoundErr.Message,
 			}, nil
 		}
+
+		var internalErr *model.InternalServerError
+		if errors.As(err, &internalErr) {
+			return &order_v1.InternalServerError{
+				Code:    internalErr.Code,
+				Message: internalErr.Message,
+			}, nil
+		}
+
+		// Неизвестная ошибка
+		return &order_v1.InternalServerError{
+			Code:    500,
+			Message: err.Error(),
+		}, nil
 	}
+
 	return converter.OrderModelToAPI(&order), nil
 }

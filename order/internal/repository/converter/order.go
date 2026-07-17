@@ -3,9 +3,10 @@ package order
 import (
 	"fmt"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	repoModel "github.com/LushnikovSR/spaceship_factory/order/internal/repository/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func OrderModelToRepoModel(order *model.Order) *repoModel.Order {

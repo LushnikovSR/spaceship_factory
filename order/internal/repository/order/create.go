@@ -30,7 +30,6 @@ func (r *repository) CreateOrder(ctx context.Context, order *model.Order) error 
 	query, args, err := builderInsert.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build query: %w", err)
-
 	}
 
 	var orderID string

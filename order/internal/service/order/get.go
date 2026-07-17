@@ -18,7 +18,7 @@ func (s *service) GetOrder(ctx context.Context, orderUUID string) (model.Order, 
 		return model.Order{}, &model.InternalServerError{
 			BaseError: model.BaseError{
 				Code:    500,
-				Message: fmt.Errorf("Order for uuid %v not found: %w", orderUUID, err).Error(),
+				Message: fmt.Errorf("order for uuid %v not found: %w", orderUUID, err).Error(),
 			},
 		}
 	}
@@ -26,7 +26,7 @@ func (s *service) GetOrder(ctx context.Context, orderUUID string) (model.Order, 
 		return model.Order{}, &model.NotFoundError{
 			BaseError: model.BaseError{
 				Code:    404,
-				Message: "Order for uuid '" + orderUUID + "' not found",
+				Message: "order for uuid '" + orderUUID + "' not found",
 			},
 		}
 	}

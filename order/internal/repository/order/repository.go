@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,7 +22,12 @@ type repository struct {
 
 func NewRepository(pool *pgxpool.Pool) (*repository, error) {
 	db := stdlib.OpenDB(*pool.Config().ConnConfig.Copy()) // Создаётся копия *pgxpool.Pool и приводится к типу *sql.DB
-	defer db.Close()
+	defer func() {
+		cerr := db.Close()
+		if cerr != nil {
+			slog.Warn("failed to close cursor", "error", cerr)
+		}
+	}()
 
 	// Инициализируем мигратор
 	migrationsDir := os.Getenv("MIGRATIONS_DIR")
@@ -29,7 +35,7 @@ func NewRepository(pool *pgxpool.Pool) (*repository, error) {
 
 	err := migratorRunner.Up()
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка миграции базы данный: %w", err)
+		return nil, fmt.Errorf("database migration error: %w", err)
 	}
 
 	return &repository{

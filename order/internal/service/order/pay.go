@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"fmt"
 
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 )
@@ -17,6 +18,14 @@ import (
 // POST /orders/{order_uuid}/pay
 func (s *service) PayOrder(ctx context.Context, paymentMethod model.PaymentMethod, orderUUID string) (string, error) {
 	order, err := s.orderRepository.GetOrder(ctx, orderUUID)
+	if err != nil {
+		return "", &model.InternalServerError{
+			BaseError: model.BaseError{
+				Code:    500,
+				Message: fmt.Errorf("order for uuid %v not found: %w", orderUUID, err).Error(),
+			},
+		}
+	}
 	if order == nil {
 		return "", &model.NotFoundError{
 			BaseError: model.BaseError{
@@ -40,7 +49,15 @@ func (s *service) PayOrder(ctx context.Context, paymentMethod model.PaymentMetho
 	order.SetPaymentMethod(&model.NilOrderDtoPaymentMethod{Value: model.OrderDtoPaymentMethod(paymentMethod)})
 	order.SetStatus(model.OrderDtoStatusPAID)
 
-	s.orderRepository.UpdateOrder(ctx, order)
+	err = s.orderRepository.UpdateOrder(ctx, order)
+	if err != nil {
+		return "", &model.InternalServerError{
+			BaseError: model.BaseError{
+				Code:    500,
+				Message: fmt.Errorf("The order status wasn`t update to PAID: %w", err).Error(),
+			},
+		}
+	}
 
 	return transactionUUID, nil
 }

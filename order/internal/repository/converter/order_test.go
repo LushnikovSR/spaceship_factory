@@ -98,7 +98,6 @@ func TestOrderRepoModelToModel_NilInput(t *testing.T) {
 }
 
 func TestOrderRepoModelToModel_NoPaymentMethod(t *testing.T) {
-
 	transactionID := "txn-uuid"
 	repoOrder := &repoModel.Order{
 		OrderUUID:       "order-uuid",

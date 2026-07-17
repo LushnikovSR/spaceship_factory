@@ -20,7 +20,6 @@ func (s *service) CreateOrder(ctx context.Context, userUUID string, partUuids []
 	parts, err := s.inventoryClient.ListParts(ctx, model.PartsFilter{
 		Uuids: partUuids,
 	})
-	fmt.Printf("From Service CreateOrder parts: %v\n err: %v\n", parts, err) // printf для отладки
 	if err != nil {
 		// Ошибка связи с InventoryService
 		return "", 0, &model.InternalServerError{

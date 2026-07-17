@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	converter "github.com/LushnikovSR/spaceship_factory/order/internal/repository/converter"
@@ -36,7 +37,7 @@ func (r *repository) UpdateOrder(ctx context.Context, order *model.Order) error 
 	if err != nil {
 		return fmt.Errorf("failed to update note: %w", err)
 	}
-	fmt.Printf("\nfor id %s updated %d rows\n", order.OrderUUID, res.RowsAffected())
+	slog.Info("\nfor id %s updated %d rows\n", order.OrderUUID, res.RowsAffected())
 
 	return nil
 }

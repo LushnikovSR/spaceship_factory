@@ -44,7 +44,7 @@ func ConnectMongo(ctx context.Context) (*mongo.Client, error) {
 		SetServerSelectionTimeout(5*time.Second))
 	if err != nil {
 		slog.Error("failed to connect to database", "error", err)
-		return &mongo.Client{}, fmt.Errorf("failed to connect to database: %w\n", err)
+		return &mongo.Client{}, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
 	return client, nil

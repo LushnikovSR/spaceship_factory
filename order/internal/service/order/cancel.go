@@ -51,7 +51,7 @@ func (s *service) CancelOrder(ctx context.Context, uuid string) error {
 		return &model.InternalServerError{
 			BaseError: model.BaseError{
 				Code:    500,
-				Message: fmt.Errorf("The order status wasn`t update to CANCELLED: %w", err).Error(),
+				Message: fmt.Errorf("the order status wasn`t update to 'cancelled': %w", err).Error(),
 			},
 		}
 	}

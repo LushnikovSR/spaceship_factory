@@ -74,7 +74,7 @@ func (s *service) CreateOrder(ctx context.Context, userUUID string, partUuids []
 		return "", 0, &model.ConflictError{
 			BaseError: model.BaseError{
 				Code:    409,
-				Message: fmt.Errorf("Failed to create order in the database: %w", err).Error(),
+				Message: fmt.Errorf("failed to create order in the database: %w", err).Error(),
 			},
 		}
 	}

@@ -54,7 +54,7 @@ func (s *service) PayOrder(ctx context.Context, paymentMethod model.PaymentMetho
 		return "", &model.InternalServerError{
 			BaseError: model.BaseError{
 				Code:    500,
-				Message: fmt.Errorf("The order status wasn`t update to PAID: %w", err).Error(),
+				Message: fmt.Errorf("the order status wasn`t update to 'paid': %w", err).Error(),
 			},
 		}
 	}

@@ -45,11 +45,23 @@ func main() {
 }
 
 func run() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pool, err := repository.ConnectPostgres(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to connect to database: %w", err)
+	}
+	defer pool.Close()
+
 	// Создаём новое хранилище для данных о заказах
-	repo := repository.NewRepository()
+	repo, err := repository.NewRepository(pool)
+	if err != nil {
+		return fmt.Errorf("failed to init repository: %w", err)
+	}
 
 	// gRPC подключение к InventoryService
-	connInv, err := grpc.NewClient(fmt.Sprintf("localhost:%s", inventoryServicePort),
+	connInv, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", inventoryServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return fmt.Errorf("failed to connect to InventoryService: %w", err)
@@ -62,7 +74,7 @@ func run() error {
 	invClient := inventory_v1.NewInventoryServiceClient(connInv)
 
 	// gRPC подключение к PaymentService
-	connPay, err := grpc.NewClient(fmt.Sprintf("localhost:%s", paymentServicePort),
+	connPay, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", paymentServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return fmt.Errorf("failed to connect to PaymentService: %w", err)
@@ -119,7 +131,7 @@ func run() error {
 	<-quit
 
 	slog.Info("🛑 Shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
+	ctx, cancel = context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {

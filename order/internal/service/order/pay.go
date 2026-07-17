@@ -16,7 +16,7 @@ import (
 //
 // POST /orders/{order_uuid}/pay
 func (s *service) PayOrder(ctx context.Context, paymentMethod model.PaymentMethod, orderUUID string) (string, error) {
-	order := s.orderRepository.GetOrder(orderUUID)
+	order, err := s.orderRepository.GetOrder(ctx, orderUUID)
 	if order == nil {
 		return "", &model.NotFoundError{
 			BaseError: model.BaseError{
@@ -40,7 +40,7 @@ func (s *service) PayOrder(ctx context.Context, paymentMethod model.PaymentMetho
 	order.SetPaymentMethod(&model.NilOrderDtoPaymentMethod{Value: model.OrderDtoPaymentMethod(paymentMethod)})
 	order.SetStatus(model.OrderDtoStatusPAID)
 
-	s.orderRepository.UpdateOrder(order)
+	s.orderRepository.UpdateOrder(ctx, order)
 
 	return transactionUUID, nil
 }

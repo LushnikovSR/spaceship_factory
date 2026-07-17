@@ -2,11 +2,9 @@ package order
 
 import (
 	"context"
-
-	"github.com/google/uuid"
+	"fmt"
 
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
-	repository "github.com/LushnikovSR/spaceship_factory/order/internal/repository"
 )
 
 // CreateOrder implements createOrder operation.
@@ -22,6 +20,7 @@ func (s *service) CreateOrder(ctx context.Context, userUUID string, partUuids []
 	parts, err := s.inventoryClient.ListParts(ctx, model.PartsFilter{
 		Uuids: partUuids,
 	})
+	fmt.Printf("From Service CreateOrder parts: %v\n err: %v\n", parts, err) // printf для отладки
 	if err != nil {
 		// Ошибка связи с InventoryService
 		return "", 0, &model.InternalServerError{
@@ -54,9 +53,6 @@ func (s *service) CreateOrder(ctx context.Context, userUUID string, partUuids []
 		total_price += part.Price
 	}
 
-	// Генерируем order_uuid
-	orderUUID = GetUniqueUUID(s.orderRepository)
-
 	var transactionUUID model.OptNilString
 	transactionUUID.SetToNull()
 
@@ -73,35 +69,16 @@ func (s *service) CreateOrder(ctx context.Context, userUUID string, partUuids []
 		Status:          model.OrderDtoStatusPENDINGPAYMENT,
 	}
 
-	// Сохраняем заказ
-	err = s.orderRepository.CreateOrder(&order)
+	// Сохраняем данные о заказе в аргументе order
+	err = s.orderRepository.CreateOrder(ctx, &order)
 	if err != nil {
 		return "", 0, &model.ConflictError{
 			BaseError: model.BaseError{
 				Code:    409,
-				Message: "Failed to create order in the database",
+				Message: fmt.Errorf("Failed to create order in the database: %w", err).Error(),
 			},
 		}
 	}
 
-	return orderUUID, total_price, nil
-}
-
-func GetUniqueUUID(storage repository.OrderRepository) string {
-	var unique bool
-	var randUuid string
-	for {
-		randUuid = uuid.NewString()
-
-		order := storage.GetOrder(randUuid)
-		if order == nil {
-			unique = true
-		}
-
-		if unique {
-			break
-		}
-	}
-
-	return randUuid
+	return order.OrderUUID, order.TotalPrice, nil
 }

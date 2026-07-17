@@ -12,9 +12,9 @@ services:
 
     environment:
       # Переменные окружения, используемые при запуске контейнера
-      POSTGRES_DB: order-service # Имя базы данных, которая будет создана при запуске
-      POSTGRES_USER: order-service-user # Имя пользователя, создаваемого в базе
-      POSTGRES_PASSWORD: order-service-password # Пароль для указанного пользователя
+      POSTGRES_DB: ${POSTGRES_DB} # Имя базы данных, которая будет создана при запуске
+      POSTGRES_USER: ${POSTGRES_USER} # Имя пользователя, создаваемого в базе
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Пароль для указанного пользователя
 
     volumes:
       - postgres_order_data:/var/lib/postgresql/data
@@ -22,7 +22,7 @@ services:
       # Он сохраняет данные между перезапусками контейнера
 
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
       # Пробрасываем внутренний порт PostgreSQL (5432) на порт хоста
       # Это нужно, чтобы другие сервисы или инструменты могли подключиться к базе
 

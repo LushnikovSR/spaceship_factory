@@ -1,21 +1,26 @@
 package order
 
 import (
+	"fmt"
+
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	repoModel "github.com/LushnikovSR/spaceship_factory/order/internal/repository/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func OrderModelToRepoModel(order *model.Order) *repoModel.Order {
 	if order == nil {
 		return nil
 	}
-	var repoPayment *repoModel.NilOrderDtoPaymentMethod
-	if order.PaymentMethod != nil {
-		// Конвертируем enum во внутреннем поле
-		repoPayment = &repoModel.NilOrderDtoPaymentMethod{
-			Value: repoModel.OrderDtoPaymentMethod(order.PaymentMethod.Value),
-			Null:  order.PaymentMethod.Null,
-		}
+
+	var transactionUUID *string
+	if order.TransactionUUID.Set && !order.TransactionUUID.Null {
+		transactionUUID = &order.TransactionUUID.Value
+	}
+
+	var paymentMethod string
+	if !order.PaymentMethod.Null {
+		paymentMethod = string(order.PaymentMethod.Value)
 	}
 
 	return &repoModel.Order{
@@ -23,9 +28,9 @@ func OrderModelToRepoModel(order *model.Order) *repoModel.Order {
 		UserUUID:        order.UserUUID,
 		PartUuids:       order.PartUuids,
 		TotalPrice:      order.TotalPrice,
-		TransactionUUID: repoModel.OptNilString(order.TransactionUUID),
-		PaymentMethod:   repoPayment,
-		Status:          repoModel.OrderDtoStatus(order.Status),
+		TransactionUUID: transactionUUID,
+		PaymentMethod:   &paymentMethod,
+		Status:          string(order.Status),
 	}
 }
 
@@ -33,13 +38,19 @@ func OrderRepoModelToModel(order *repoModel.Order) *model.Order {
 	if order == nil {
 		return nil
 	}
-	var payment *model.NilOrderDtoPaymentMethod
+
+	var transactionID model.OptNilString
+	if order.TransactionUUID != nil {
+		transactionID.SetTo(*order.TransactionUUID)
+	} else {
+		transactionID.SetToNull()
+	}
+
+	paymentMethod := &model.NilOrderDtoPaymentMethod{}
 	if order.PaymentMethod != nil {
-		// Конвертируем enum во внутреннем поле
-		payment = &model.NilOrderDtoPaymentMethod{
-			Value: model.OrderDtoPaymentMethod(order.PaymentMethod.Value),
-			Null:  order.PaymentMethod.Null,
-		}
+		paymentMethod.Value = model.OrderDtoPaymentMethod(*order.PaymentMethod)
+	} else {
+		paymentMethod.Null = true
 	}
 
 	return &model.Order{
@@ -47,8 +58,16 @@ func OrderRepoModelToModel(order *repoModel.Order) *model.Order {
 		UserUUID:        order.UserUUID,
 		PartUuids:       order.PartUuids,
 		TotalPrice:      order.TotalPrice,
-		TransactionUUID: model.OptNilString(order.TransactionUUID),
-		PaymentMethod:   payment,
+		TransactionUUID: transactionID,
+		PaymentMethod:   paymentMethod,
 		Status:          model.OrderDtoStatus(order.Status),
 	}
+}
+
+func UuidToRepo(uuid string) (primitive.ObjectID, error) {
+	repoUUID, err := primitive.ObjectIDFromHex(uuid)
+	if err != nil {
+		return primitive.ObjectID{}, fmt.Errorf("failed to convert to primitive.ObjectID: %w", err)
+	}
+	return repoUUID, nil
 }

@@ -1,10 +1,12 @@
 package inventory
 
 import (
+	"fmt"
 	"log/slog"
 
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func RepoModelToModel(part repoModel.Part) *model.Part {
@@ -64,4 +66,16 @@ func ToModelParts(repoParts []repoModel.Part) []*model.Part {
 		parts = append(parts, part)
 	}
 	return parts
+}
+
+func UuidsToRepo(uuids []string) ([]primitive.ObjectID, error) {
+	repoUuids := make([]primitive.ObjectID, 0, len(uuids))
+	for _, uuid := range uuids {
+		repoUUID, err := primitive.ObjectIDFromHex(uuid)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert to primitive.ObjectID: %w", err)
+		}
+		repoUuids = append(repoUuids, repoUUID)
+	}
+	return repoUuids, nil
 }

@@ -13,8 +13,11 @@ import (
 //
 // POST /orders/{order_uuid}/cancel
 func (s *service) CancelOrder(ctx context.Context, uuid string) error {
-	order := s.orderRepository.GetOrder(uuid)
-	if order == nil {
+	order, err := s.orderRepository.GetOrder(ctx, uuid)
+	if err != nil {
+		return err
+	}
+	if order.OrderUUID == "" {
 		return &model.NotFoundError{
 			BaseError: model.BaseError{
 				Code:    404,
@@ -42,7 +45,7 @@ func (s *service) CancelOrder(ctx context.Context, uuid string) error {
 	}
 
 	order.SetStatus(model.OrderDtoStatusCANCELLED)
-	s.orderRepository.UpdateOrder(order)
+	s.orderRepository.UpdateOrder(ctx, order)
 
 	return nil
 }

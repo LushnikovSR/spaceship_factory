@@ -61,7 +61,7 @@ type InventoryClient_ListParts_Call struct {
 // ListParts is a helper method to define mock.On call
 //   - ctx context.Context
 //   - filter order.PartsFilter
-func (_e *InventoryClient_Expecter) ListParts(ctx, filter interface{}) *InventoryClient_ListParts_Call {
+func (_e *InventoryClient_Expecter) ListParts(ctx interface{}, filter interface{}) *InventoryClient_ListParts_Call {
 	return &InventoryClient_ListParts_Call{Call: _e.mock.On("ListParts", ctx, filter)}
 }
 
@@ -87,8 +87,7 @@ func (_c *InventoryClient_ListParts_Call) RunAndReturn(run func(context.Context,
 func NewInventoryClient(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *InventoryClient {
+}) *InventoryClient {
 	mock := &InventoryClient{}
 	mock.Mock.Test(t)
 

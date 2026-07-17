@@ -73,6 +73,10 @@ func main() {
 		}
 	}()
 
+	// Выставляем таймаут для проверки подключения к базе
+	ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	// Проверяем соединение с базой данных
 	err = client.Ping(ctx, nil)
 	if err != nil {

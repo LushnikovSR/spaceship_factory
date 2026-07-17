@@ -6,9 +6,16 @@ import (
 )
 
 func OrderModelToAPI(order *model.Order) *order_v1.OrderDto {
-	payment := &order_v1.NilOrderDtoPaymentMethod{
-		Value: order_v1.OrderDtoPaymentMethod(order.PaymentMethod.Value),
-		Null:  order.PaymentMethod.Null,
+	if order == nil {
+		return nil
+	}
+
+	var payment *order_v1.NilOrderDtoPaymentMethod
+	if order.PaymentMethod != nil {
+		payment = &order_v1.NilOrderDtoPaymentMethod{
+			Value: order_v1.OrderDtoPaymentMethod(order.PaymentMethod.Value),
+			Null:  order.PaymentMethod.Null,
+		}
 	}
 
 	return &order_v1.OrderDto{

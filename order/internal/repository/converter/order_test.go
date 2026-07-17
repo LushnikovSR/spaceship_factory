@@ -24,14 +24,16 @@ func TestOrderModelToRepoModel_NoPaymentMethod(t *testing.T) {
 		Status:          model.OrderDtoStatusPENDINGPAYMENT,
 	}
 
+	transactionID := "txn-uuid"
+
 	expected := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"part1", "part2"},
 		TotalPrice:      1234.56,
-		TransactionUUID: repoModel.NewOptNilString("txn-uuid"),
+		TransactionUUID: &transactionID,
 		PaymentMethod:   nil,
-		Status:          repoModel.OrderDtoStatusPENDINGPAYMENT,
+		Status:          "PENDING_PAYMENT",
 	}
 
 	result := OrderModelToRepoModel(order)
@@ -50,15 +52,15 @@ func TestOrderModelToRepoModel_WithPaymentMethod(t *testing.T) {
 		Status:          model.OrderDtoStatusPAID,
 	}
 
-	expectedPM := repoModel.NewNilOrderDtoPaymentMethod(repoModel.OrderDtoPaymentMethodCARD)
+	expectedPM := "CARD"
 	expected := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"part1"},
 		TotalPrice:      99.99,
-		TransactionUUID: repoModel.OptNilString{Set: false},
+		TransactionUUID: nil,
 		PaymentMethod:   &expectedPM,
-		Status:          repoModel.OrderDtoStatusPAID,
+		Status:          "PAID",
 	}
 
 	result := OrderModelToRepoModel(order)
@@ -77,15 +79,14 @@ func TestOrderModelToRepoModel_PaymentMethodNullTrue(t *testing.T) {
 		Status:          model.OrderDtoStatusCANCELLED,
 	}
 
-	expectedPM := repoModel.NilOrderDtoPaymentMethod{Null: true}
 	expected := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       nil,
 		TotalPrice:      0,
-		TransactionUUID: repoModel.OptNilString{},
-		PaymentMethod:   &expectedPM,
-		Status:          repoModel.OrderDtoStatusCANCELLED,
+		TransactionUUID: nil,
+		PaymentMethod:   nil,
+		Status:          "CANCELLED",
 	}
 
 	result := OrderModelToRepoModel(order)
@@ -97,14 +98,16 @@ func TestOrderRepoModelToModel_NilInput(t *testing.T) {
 }
 
 func TestOrderRepoModelToModel_NoPaymentMethod(t *testing.T) {
+
+	transactionID := "txn-uuid"
 	repoOrder := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"partA", "partB"},
 		TotalPrice:      42.0,
-		TransactionUUID: repoModel.NewOptNilString("txn-uuid"),
+		TransactionUUID: &transactionID,
 		PaymentMethod:   nil,
-		Status:          repoModel.OrderDtoStatusPAID,
+		Status:          "PAID",
 	}
 
 	expected := &model.Order{
@@ -122,15 +125,15 @@ func TestOrderRepoModelToModel_NoPaymentMethod(t *testing.T) {
 }
 
 func TestOrderRepoModelToModel_WithPaymentMethod(t *testing.T) {
-	pm := repoModel.NewNilOrderDtoPaymentMethod(repoModel.OrderDtoPaymentMethodSBP)
+	paymentMethod := "SPB"
 	repoOrder := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"partX"},
 		TotalPrice:      500.0,
-		TransactionUUID: repoModel.OptNilString{Set: true, Null: true},
-		PaymentMethod:   &pm,
-		Status:          repoModel.OrderDtoStatusCANCELLED,
+		TransactionUUID: nil,
+		PaymentMethod:   &paymentMethod,
+		Status:          "CANCELLED",
 	}
 
 	expectedPM := model.NewNilOrderDtoPaymentMethod(model.OrderDtoPaymentMethodSBP)

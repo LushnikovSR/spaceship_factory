@@ -1,22 +1,18 @@
 package order
 
-import "github.com/go-faster/errors"
+import (
+	"github.com/go-faster/errors"
+)
 
+// Order – строка таблицы orders в PostgreSQL.
 type Order struct {
-	// UUID of order.
-	OrderUUID string
-	// User`s UUID.
-	UserUUID string
-	// Array of part uuids.
-	PartUuids []string
-	// Total coast of all parts in the order.
-	TotalPrice float64
-	// Transaction`s UUID (if paid).
-	TransactionUUID OptNilString
-	// PaymentMethod (if paid).
-	PaymentMethod *NilOrderDtoPaymentMethod
-	// Status of order, default "PENDING_PAYMENT".
-	Status OrderDtoStatus
+	OrderUUID       string   `db:"order_uuid"` // первичный ключ
+	UserUUID        string   `db:"user_uuid"`
+	PartUuids       []string `db:"part_uuids"` // text[] или jsonb в БД
+	TotalPrice      float64  `db:"total_price"`
+	TransactionUUID *string  `db:"transaction_uuid"` // NULL, если не оплачен
+	PaymentMethod   *string  `db:"payment_method"`   // NULL, если не оплачен
+	Status          string   `db:"status"`           // PENDING_PAYMENT, PAID, CANCELLED
 }
 
 // OptNilString is optional nullable string.

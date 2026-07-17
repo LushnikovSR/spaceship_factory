@@ -7,9 +7,10 @@ import (
 	"log/slog"
 	"time"
 
-	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
 )
 
 func (r *repository) Init(ctx context.Context) {
@@ -65,7 +66,6 @@ func (r *repository) Init(ctx context.Context) {
 	} else {
 		slog.Info(fmt.Sprintf("part with id %s correctly added", id3))
 	}
-
 }
 
 // Create создает новую запись в mongoDB.Collection

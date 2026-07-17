@@ -20,7 +20,7 @@ func (r *repository) GetPart(ctx context.Context, id string) (*model.Part, error
 
 	objID, err := primitive.ObjectIDFromHex(id) // ObjectIDFromHex takes an argument of 24 characters in length
 	if err != nil {
-		return &model.Part{}, fmt.Errorf("Неверный формат строки: %v", err)
+		return &model.Part{}, fmt.Errorf("Неверный формат строки: %w", err)
 	}
 
 	err = r.data.FindOne(ctx, bson.M{"_id": objID}).Decode(&part)

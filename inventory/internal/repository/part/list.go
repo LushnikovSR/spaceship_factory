@@ -3,11 +3,13 @@ package inventory
 import (
 	"context"
 	"fmt"
+	"log/slog"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 	converter "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/converter"
 	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (r *repository) ListParts(ctx context.Context, filter *model.PartsFilter) (parts []*model.Part, err error) {
@@ -84,7 +86,12 @@ func (r *repository) find(ctx context.Context, filter interface{}) ([]repoModel.
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func() {
+		cerr := cursor.Close(ctx)
+		if cerr != nil {
+			slog.Warn("failed to close cursor", "error", cerr)
+		}
+	}()
 
 	var parts []repoModel.Part
 	if err := cursor.All(ctx, &parts); err != nil {

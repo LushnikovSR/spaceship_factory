@@ -16,11 +16,6 @@ import (
 // GetOrder возвращает информацию о заказе по uuid.
 // Если заказ не найден, возвращает пустой объект.
 func (r *repository) GetOrder(ctx context.Context, uuid string) (*model.Order, error) {
-	/*repoUUID, err := converter.UuidToRepo(uuid)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert to primitive.ObjectID: %w", err)
-	}*/
-
 	// Строим запрос на выборку записей из таблицы orders
 	builderSelect := sq.Select("order_uuid", "user_uuid", "part_uuids", "total_price", "transaction_uuid", "payment_method", "status").
 		From("orders").

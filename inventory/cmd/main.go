@@ -42,78 +42,63 @@ func panicRecoveryInterceptor() grpc.UnaryServerInterceptor {
 	}
 }
 
-func main() {
+func run() error {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
-		slog.Error("failed to listen", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to listen: %w", err)
 	}
 
-	slog.Info("👂 listener is running and will be closed using grpc.Server.GracefulStop()")
+	s := grpc.NewServer(grpc.UnaryInterceptor(panicRecoveryInterceptor()))
 
-	// Создаем gRPC сервер
-	s := grpc.NewServer(
-		grpc.UnaryInterceptor(panicRecoveryInterceptor()),
-	)
-
-	// Подключаемся к mongoDB
+	// Контекст для подключения к MongoDB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	client, err := repository.ConnectMongo(ctx)
 	if err != nil {
-		slog.Error("failed to connect to MongoDB", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
-
 	defer func() {
-		cerr := client.Disconnect(context.Background())
-		if cerr != nil {
+		if cerr := client.Disconnect(context.Background()); cerr != nil {
 			slog.Warn("MongoDB disconnect error", "error", cerr)
 		}
 	}()
 
-	// Выставляем таймаут для проверки подключения к базе
-	ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	// Проверяем соединение с базой данных
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		slog.Error("failed to ping to database", "error", err)
-		os.Exit(1)
+	// Пинг с отдельным коротким таймаутом
+	pingCtx, pingCancel := context.WithTimeout(ctx, 5*time.Second)
+	defer pingCancel()
+	if err := client.Ping(pingCtx, nil); err != nil {
+		return fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	// Получаем базу данных
 	db := client.Database("inventory")
-
 	repo := repository.NewRepository(db)
-
 	repo.Init(ctx)
 
-	// Регистрируем Inventory сервис
-	service := service.NewService(repo)
-	api := apiV1.NewAPI(service)
-
+	svc := service.NewService(repo)
+	api := apiV1.NewAPI(svc)
 	inventory_v1.RegisterInventoryServiceServer(s, api)
-
-	// Включаем рефлексию для отладки
 	reflection.Register(s)
 
 	go func() {
-		slog.Info("🚀 gRPC server listening", "port", grpcPort)
-		err := s.Serve(lis)
-		if err != nil {
+		slog.Info("gRPC server listening", "port", grpcPort)
+		if err := s.Serve(lis); err != nil {
 			slog.Error("failed to serve", "error", err)
-			os.Exit(1)
 		}
 	}()
 
-	// Gracefull shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	slog.Info("🛑 Shutting down gRPC server...")
+	slog.Info("Shutting down gRPC server...")
 	s.GracefulStop()
-	slog.Info("✅ Server stopped")
+	slog.Info("Server stopped")
+	return nil
+}
+
+func main() {
+	if err := run(); err != nil {
+		slog.Error("Application error", "error", err)
+		os.Exit(1)
+	}
 }

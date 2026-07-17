@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log/slog"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
 	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func RepoModelToModel(part repoModel.Part) *model.Part {

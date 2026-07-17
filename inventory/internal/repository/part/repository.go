@@ -7,11 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	def "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository"
-	"github.com/joho/godotenv"
 )
 
 var _ def.PartRepository = (*repository)(nil)
@@ -44,7 +44,7 @@ func ConnectMongo(ctx context.Context) (*mongo.Client, error) {
 		SetServerSelectionTimeout(5*time.Second))
 	if err != nil {
 		slog.Error("failed to connect to database", "error", err)
-		return &mongo.Client{}, fmt.Errorf("failed to connect to database: %v\n", err)
+		return &mongo.Client{}, fmt.Errorf("failed to connect to database: %w\n", err)
 	}
 
 	return client, nil

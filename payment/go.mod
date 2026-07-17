@@ -4,6 +4,7 @@ go 1.26.4
 
 require (
 	github.com/LushnikovSR/spaceship_factory/shared v0.0.0-20260627190843-c210485b755f
+	github.com/brianvoe/gofakeit/v7 v7.15.0
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/grpc v1.81.1

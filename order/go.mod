@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/LushnikovSR/spaceship_factory/internal/middleware v0.0.0-20260627190843-c210485b755f
 	github.com/LushnikovSR/spaceship_factory/shared v0.0.0-20260627190843-c210485b755f
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/brianvoe/gofakeit/v7 v7.15.0
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-chi/render v1.0.3
@@ -14,11 +15,11 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/pressly/goose/v3 v3.27.2
 	github.com/stretchr/testify v1.11.1
+	go.mongodb.org/mongo-driver v1.17.9
 	google.golang.org/grpc v1.81.1
 )
 
 require (
-	github.com/Masterminds/squirrel v1.5.4 // indirect
 	github.com/ajg/form v1.7.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

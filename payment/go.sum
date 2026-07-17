@@ -1,5 +1,7 @@
 github.com/LushnikovSR/spaceship_factory/shared v0.0.0-20260627190843-c210485b755f h1:MA8XKu0Sx0PUhy9MktepKIsmrEDDmA4pqeYv0wk0P8I=
 github.com/LushnikovSR/spaceship_factory/shared v0.0.0-20260627190843-c210485b755f/go.mod h1:WpI1WlKLBg6o5oQH6USXKPCnWZ3gjlZ58a4punXykLI=
+github.com/brianvoe/gofakeit/v7 v7.15.0 h1:kGLYAWN8tnmxq2PelKVK6zwpM7kMxdz9SGPH31mFkNs=
+github.com/brianvoe/gofakeit/v7 v7.15.0/go.mod h1:QXuPeBw164PJCzCUZVmgpgHJ3Llj49jSLVkKPMtxtxA=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

@@ -17,11 +17,13 @@ func (s *ServiceSuite) TestCancelOrder_Success() {
 	)
 
 	s.orderRepository.
-		On("GetOrder", orderUUID).
-		Return(order).
+		On("GetOrder", s.ctx, orderUUID).
+		Return(order, nil).
 		Once()
 
-	s.orderRepository.On("UpdateOrder", order)
+	s.orderRepository.On("UpdateOrder", s.ctx, order).
+		Return(nil).
+		Once()
 
 	err := s.service.CancelOrder(s.ctx, orderUUID)
 	s.Require().NoError(err)
@@ -29,8 +31,8 @@ func (s *ServiceSuite) TestCancelOrder_Success() {
 
 func (s *ServiceSuite) TestCancelOrder_RepoError_NotFound() {
 	s.orderRepository.
-		On("GetOrder", "non-existent").
-		Return(nil).
+		On("GetOrder", s.ctx, "non-existent").
+		Return(&model.Order{}, nil).
 		Once()
 
 	err := s.service.CancelOrder(s.ctx, "non-existent")
@@ -51,8 +53,8 @@ func (s *ServiceSuite) TestCancelOrder_RepoError_Conflict() {
 	)
 
 	s.orderRepository.
-		On("GetOrder", orderUUID).
-		Return(order).
+		On("GetOrder", s.ctx, orderUUID).
+		Return(order, nil).
 		Once()
 
 	err := s.service.CancelOrder(s.ctx, orderUUID)
@@ -73,8 +75,8 @@ func (s *ServiceSuite) TestCancelOrder_RepoError_BadRequest() {
 	)
 
 	s.orderRepository.
-		On("GetOrder", orderUUID).
-		Return(order).
+		On("GetOrder", s.ctx, orderUUID).
+		Return(order, nil).
 		Once()
 
 	err := s.service.CancelOrder(s.ctx, orderUUID)

@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 )
@@ -26,7 +27,10 @@ func (s *service) PayOrder(ctx context.Context, paymentMethod model.PaymentMetho
 			},
 		}
 	}
-	if order == nil {
+
+	empty := &model.Order{}
+
+	if reflect.DeepEqual(order, empty) || order == nil {
 		return "", &model.NotFoundError{
 			BaseError: model.BaseError{
 				Code:    404,

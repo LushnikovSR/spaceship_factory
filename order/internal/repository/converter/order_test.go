@@ -14,17 +14,21 @@ func TestOrderModelToRepoModel_NilInput(t *testing.T) {
 }
 
 func TestOrderModelToRepoModel_NoPaymentMethod(t *testing.T) {
+	paymentMethod := &model.NilOrderDtoPaymentMethod{}
+	paymentMethod.SetToNull()
+
 	order := &model.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"part1", "part2"},
 		TotalPrice:      1234.56,
 		TransactionUUID: model.NewOptNilString("txn-uuid"),
-		PaymentMethod:   nil,
+		PaymentMethod:   paymentMethod,
 		Status:          model.OrderDtoStatusPENDINGPAYMENT,
 	}
 
 	transactionID := "txn-uuid"
+	var expectedPaymentMethod string
 
 	expected := &repoModel.Order{
 		OrderUUID:       "order-uuid",
@@ -32,61 +36,40 @@ func TestOrderModelToRepoModel_NoPaymentMethod(t *testing.T) {
 		PartUuids:       []string{"part1", "part2"},
 		TotalPrice:      1234.56,
 		TransactionUUID: &transactionID,
-		PaymentMethod:   nil,
+		PaymentMethod:   &expectedPaymentMethod,
 		Status:          "PENDING_PAYMENT",
 	}
 
 	result := OrderModelToRepoModel(order)
-	assert.Equal(t, expected, result)
+	assert.Equal(t, *expected, *result)
 }
 
 func TestOrderModelToRepoModel_WithPaymentMethod(t *testing.T) {
 	pm := model.NewNilOrderDtoPaymentMethod(model.OrderDtoPaymentMethodCARD)
+	transactionID := model.OptNilString{}
+	transactionID.SetToNull()
+
 	order := &model.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"part1"},
 		TotalPrice:      99.99,
-		TransactionUUID: model.OptNilString{Set: false}, // не задано
+		TransactionUUID: transactionID, // не задано
 		PaymentMethod:   &pm,
 		Status:          model.OrderDtoStatusPAID,
 	}
 
 	expectedPM := "CARD"
+	var expectedTransactionID *string
+
 	expected := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"part1"},
 		TotalPrice:      99.99,
-		TransactionUUID: nil,
+		TransactionUUID: expectedTransactionID,
 		PaymentMethod:   &expectedPM,
 		Status:          "PAID",
-	}
-
-	result := OrderModelToRepoModel(order)
-	assert.Equal(t, expected, result)
-}
-
-func TestOrderModelToRepoModel_PaymentMethodNullTrue(t *testing.T) {
-	pm := model.NilOrderDtoPaymentMethod{Null: true}
-	order := &model.Order{
-		OrderUUID:       "order-uuid",
-		UserUUID:        "user-uuid",
-		PartUuids:       nil,
-		TotalPrice:      0,
-		TransactionUUID: model.OptNilString{},
-		PaymentMethod:   &pm,
-		Status:          model.OrderDtoStatusCANCELLED,
-	}
-
-	expected := &repoModel.Order{
-		OrderUUID:       "order-uuid",
-		UserUUID:        "user-uuid",
-		PartUuids:       nil,
-		TotalPrice:      0,
-		TransactionUUID: nil,
-		PaymentMethod:   nil,
-		Status:          "CANCELLED",
 	}
 
 	result := OrderModelToRepoModel(order)
@@ -99,15 +82,20 @@ func TestOrderRepoModelToModel_NilInput(t *testing.T) {
 
 func TestOrderRepoModelToModel_NoPaymentMethod(t *testing.T) {
 	transactionID := "txn-uuid"
+	var paymentMethod *string
+
 	repoOrder := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"partA", "partB"},
 		TotalPrice:      42.0,
 		TransactionUUID: &transactionID,
-		PaymentMethod:   nil,
+		PaymentMethod:   paymentMethod,
 		Status:          "PAID",
 	}
+
+	expectedPaymentMethod := &model.NilOrderDtoPaymentMethod{}
+	expectedPaymentMethod.SetToNull()
 
 	expected := &model.Order{
 		OrderUUID:       "order-uuid",
@@ -115,7 +103,7 @@ func TestOrderRepoModelToModel_NoPaymentMethod(t *testing.T) {
 		PartUuids:       []string{"partA", "partB"},
 		TotalPrice:      42.0,
 		TransactionUUID: model.NewOptNilString("txn-uuid"),
-		PaymentMethod:   nil,
+		PaymentMethod:   expectedPaymentMethod,
 		Status:          model.OrderDtoStatusPAID,
 	}
 
@@ -124,7 +112,7 @@ func TestOrderRepoModelToModel_NoPaymentMethod(t *testing.T) {
 }
 
 func TestOrderRepoModelToModel_WithPaymentMethod(t *testing.T) {
-	paymentMethod := "SPB"
+	paymentMethod := "SBP"
 	repoOrder := &repoModel.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
@@ -135,14 +123,16 @@ func TestOrderRepoModelToModel_WithPaymentMethod(t *testing.T) {
 		Status:          "CANCELLED",
 	}
 
-	expectedPM := model.NewNilOrderDtoPaymentMethod(model.OrderDtoPaymentMethodSBP)
+	expectedPM := &model.NilOrderDtoPaymentMethod{}
+	expectedPM.SetTo(model.OrderDtoPaymentMethodSBP)
+
 	expected := &model.Order{
 		OrderUUID:       "order-uuid",
 		UserUUID:        "user-uuid",
 		PartUuids:       []string{"partX"},
 		TotalPrice:      500.0,
 		TransactionUUID: model.OptNilString{Set: true, Null: true},
-		PaymentMethod:   &expectedPM,
+		PaymentMethod:   expectedPM,
 		Status:          model.OrderDtoStatusCANCELLED,
 	}
 

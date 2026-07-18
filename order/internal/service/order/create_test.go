@@ -15,6 +15,7 @@ func (s *ServiceSuite) TestCreateOrder_Success() {
 			"22222222-2222-2222-2222-222222222222",
 		}
 		expectedTotal = 1800.0
+		expectedUUID  = gofakeit.UUID()
 
 		parts = []model.Part{
 			{
@@ -42,25 +43,21 @@ func (s *ServiceSuite) TestCreateOrder_Success() {
 		Return(parts, nil).
 		Once()
 
-	// 2. Мокаем CreateOrder – принимает любой *model.Order, возвращает nil
+	// 2. Мокаем CreateOrder — при вызове проставляем UUID в заказе
 	s.orderRepository.
-		On("CreateOrder", mock.MatchedBy(func(o any) bool {
-			// Приведение к model.Order (или к тому типу, который реально используется)
+		On("CreateOrder", s.ctx, mock.MatchedBy(func(o any) bool {
 			order, ok := o.(*model.Order)
 			return ok && order.UserUUID == userUUID && len(order.PartUuids) == len(partUuids)
 		})).
+		Run(func(args mock.Arguments) {
+			order := args.Get(1).(*model.Order) // args[0]=ctx, args[1]=*model.Order
+			order.OrderUUID = expectedUUID      // эмулируем RETURNING order_uuid
+		}).
 		Return(nil).
 		Once()
 
-	s.orderRepository.
-		On("GetOrder", mock.AnythingOfType("string")).
-		Return(nil).
-		Once()
-
-	// 3. Вызываем тестируемый метод
+	// 3. Вызываем тестируемый метод и проверяем результаты
 	orderUUID, totalPrice, err := s.service.CreateOrder(s.ctx, userUUID, partUuids)
-
-	// 4. Проверяем результаты
 	s.Require().NoError(err)
 	s.Require().NotEmpty(orderUUID)
 	s.Require().Len(orderUUID, 36)
@@ -124,17 +121,12 @@ func (s *ServiceSuite) TestCreateOrder_RepositoryError() {
 		Once()
 
 	s.orderRepository.
-		On("CreateOrder", mock.MatchedBy(func(o any) bool {
+		On("CreateOrder", s.ctx, mock.MatchedBy(func(o any) bool {
 			// Приведение к model.Order (или к тому типу, который реально используется)
 			order, ok := o.(*model.Order)
 			return ok && order.UserUUID == userUUID && len(order.PartUuids) == len(partUuids)
 		})).
 		Return(gofakeit.Error()).
-		Once()
-
-	s.orderRepository.
-		On("GetOrder", mock.AnythingOfType("string")).
-		Return(nil).
 		Once()
 
 	orderUUID, totalPrice, err := s.service.CreateOrder(s.ctx, userUUID, partUuids)

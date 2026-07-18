@@ -2,444 +2,181 @@ package inventory
 
 import (
 	"context"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 
 	model "github.com/LushnikovSR/spaceship_factory/inventory/internal/model"
+	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
 )
 
-func (s *RepositorySuite) TestListParts_FullFilter() {
-	var (
-		partUuids                 = []string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}
-		partNmaes                 = []string{"Сопло маршевое", "Иллюминатор стандартный"}
-		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
-		partManufacturerCountries = []string{"Germany"}
-		partTags                  = []string{"engine", "window"}
+func TestRepository_ListParts(t *testing.T) {
+	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
-		filter = &model.PartsFilter{
-			Uuids:                 partUuids,
-			Names:                 partNmaes,
-			Categories:            partCategories,
-			ManufacturerCountries: partManufacturerCountries,
-			Tags:                  partTags,
+	mt.Run("success", func(mt *mtest.T) {
+		repo := NewRepository(mt.DB)
+
+		repoPart := repoModel.Part{
+			ID:            primitive.NewObjectID(),
+			Name:          "Engine",
+			Price:         1000,
+			StockQuantity: 5,
+			Category:      repoModel.CATEGORY_ENGINE,
+			Tags:          []string{"engine"},
 		}
 
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
+		raw, err := bson.Marshal(repoPart)
+		require.NoError(mt, err)
 
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
-			},
-			{
-				UUID:          "22222222-2222-2222-2222-222222222222",
-				Name:          "Иллюминатор стандартный",
-				Price:         300.0,
-				StockQuantity: 12,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"porthole", "window"},
-			},
-		}
-	)
-	s.repository.Init(context.Background())
+		var doc bson.D
+		require.NoError(mt, bson.Unmarshal(raw, &doc))
 
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedParts, parts)
+		mt.AddMockResponses(
+			mtest.CreateCursorResponse(
+				1,
+				"inventory.parts",
+				mtest.FirstBatch,
+				doc,
+			),
+			mtest.CreateCursorResponse(
+				0,
+				"inventory.parts",
+				mtest.NextBatch,
+			),
+		)
+
+		parts, err := repo.ListParts(context.Background(), nil)
+
+		require.NoError(mt, err)
+		require.Len(mt, parts, 1)
+
+		require.Equal(mt, repoPart.ID.Hex(), parts[0].UUID)
+		require.Equal(mt, repoPart.Name, parts[0].Name)
+		require.EqualValues(mt, repoPart.StockQuantity, parts[0].StockQuantity)
+	})
+
+	mt.Run("empty", func(mt *mtest.T) {
+		repo := NewRepository(mt.DB)
+
+		mt.AddMockResponses(
+			mtest.CreateCursorResponse(
+				0,
+				"inventory.parts",
+				mtest.FirstBatch,
+			),
+		)
+
+		parts, err := repo.ListParts(context.Background(), nil)
+
+		require.NoError(mt, err)
+		require.Empty(mt, parts)
+	})
 }
 
-func (s *RepositorySuite) TestListParts_NillFilter() {
-	var (
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
+func TestBuildMongoFilter(t *testing.T) {
+	engineID := primitive.NewObjectID()
 
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
+	tests := []struct {
+		name    string
+		filter  *model.PartsFilter
+		want    bson.M
+		wantErr bool
+	}{
+		{
+			name:   "nil filter",
+			filter: nil,
+			want:   bson.M{},
+		},
+		{
+			name: "name filter",
+			filter: &model.PartsFilter{
+				Names: []string{"Engine"},
 			},
-			{
-				UUID:          "22222222-2222-2222-2222-222222222222",
-				Name:          "Иллюминатор стандартный",
-				Price:         300.0,
-				StockQuantity: 12,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"porthole", "window"},
+			want: bson.M{
+				"name": bson.M{
+					"$in": []string{"Engine"},
+				},
 			},
-			{
-				UUID:          "33333333-3333-3333-3333-333333333333",
-				Name:          "Иллюминатор квадратный",
-				Price:         600.0,
-				StockQuantity: 2,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  nil,
-				Tags:          nil,
+		},
+		{
+			name: "manufacturer country",
+			filter: &model.PartsFilter{
+				ManufacturerCountries: []string{"Germany"},
 			},
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, nil)
-	s.Require().NoError(err)
-	s.Require().ElementsMatch(expectedParts, parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithNonExistentPartUuidAmongPartUuids() {
-	var (
-		nonExistentPartUUID       = "non-existent"
-		partUuids                 = []string{"11111111-1111-1111-1111-111111111111", nonExistentPartUUID}
-		partNmaes                 = []string{"Сопло маршевое", "Иллюминатор стандартный"}
-		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
-		partManufacturerCountries = []string{"Germany"}
-		partTags                  = []string{"engine", "window"}
-
-		filter = &model.PartsFilter{
-			Uuids:                 partUuids,
-			Names:                 partNmaes,
-			Categories:            partCategories,
-			ManufacturerCountries: partManufacturerCountries,
-			Tags:                  partTags,
-		}
-
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
-
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
+			want: bson.M{
+				"manufacturer.country": bson.M{
+					"$in": []string{"Germany"},
+				},
 			},
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedParts, parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithNonExistentPartUUID() {
-	var (
-		nonExistentPartUUID       = "non-existent"
-		partUuids                 = []string{nonExistentPartUUID}
-		partNmaes                 = []string{"Сопло маршевое", "Иллюминатор стандартный"}
-		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
-		partManufacturerCountries = []string{"Germany"}
-		partTags                  = []string{"engine", "window"}
-
-		filter = &model.PartsFilter{
-			Uuids:                 partUuids,
-			Names:                 partNmaes,
-			Categories:            partCategories,
-			ManufacturerCountries: partManufacturerCountries,
-			Tags:                  partTags,
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().Empty(parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithNonExistentPartName() {
-	var (
-		nonExistentPartName       = "non-existent"
-		partUuids                 = []string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}
-		partNmaes                 = []string{nonExistentPartName}
-		partCategories            = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
-		partManufacturerCountries = []string{"Germany"}
-		partTags                  = []string{"engine", "window"}
-
-		filter = &model.PartsFilter{
-			Uuids:                 partUuids,
-			Names:                 partNmaes,
-			Categories:            partCategories,
-			ManufacturerCountries: partManufacturerCountries,
-			Tags:                  partTags,
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().Empty(parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithOnlyUuidsInFilter() {
-	var (
-		partUuids = []string{"11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"}
-
-		filter = &model.PartsFilter{
-			Uuids: partUuids,
-		}
-
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
-
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
+		},
+		{
+			name: "tags",
+			filter: &model.PartsFilter{
+				Tags: []string{"engine", "main"},
 			},
-			{
-				UUID:          "22222222-2222-2222-2222-222222222222",
-				Name:          "Иллюминатор стандартный",
-				Price:         300.0,
-				StockQuantity: 12,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"porthole", "window"},
+			want: bson.M{
+				"tags": bson.M{
+					"$in": []string{"engine", "main"},
+				},
 			},
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedParts, parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithDoubleUuidInFilter() {
-	var (
-		partUuids = []string{"11111111-1111-1111-1111-111111111111", "11111111-1111-1111-1111-111111111111"}
-
-		filter = &model.PartsFilter{
-			Uuids: partUuids,
-		}
-
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
-
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
+		},
+		{
+			name: "uuid",
+			filter: &model.PartsFilter{
+				Uuids: []string{engineID.Hex()},
 			},
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedParts, parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithOnlyNamesInFilter() {
-	var (
-		partNmaes = []string{"Сопло маршевое", "Иллюминатор стандартный"}
-
-		filter = &model.PartsFilter{
-			Names: partNmaes,
-		}
-
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
-
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
+			want: bson.M{
+				"_id": bson.M{
+					"$in": []primitive.ObjectID{engineID},
+				},
 			},
-			{
-				UUID:          "22222222-2222-2222-2222-222222222222",
-				Name:          "Иллюминатор стандартный",
-				Price:         300.0,
-				StockQuantity: 12,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"porthole", "window"},
+		},
+		{
+			name: "invalid uuid",
+			filter: &model.PartsFilter{
+				Uuids: []string{"invalid"},
 			},
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().ElementsMatch(expectedParts, parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithOnlyCategoriesInFilter() {
-	var (
-		partCategories = []model.Category{model.CATEGORY_ENGINE, model.CATEGORY_PORTHOLE}
-
-		filter = &model.PartsFilter{
-			Categories: partCategories,
-		}
-
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
-
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
+			wantErr: true,
+		},
+		{
+			name: "combined",
+			filter: &model.PartsFilter{
+				Uuids:                 []string{engineID.Hex()},
+				Names:                 []string{"Engine"},
+				ManufacturerCountries: []string{"Germany"},
+				Tags:                  []string{"engine"},
 			},
-			{
-				UUID:          "22222222-2222-2222-2222-222222222222",
-				Name:          "Иллюминатор стандартный",
-				Price:         300.0,
-				StockQuantity: 12,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"porthole", "window"},
+			want: bson.M{
+				"_id": bson.M{
+					"$in": []primitive.ObjectID{engineID},
+				},
+				"name": bson.M{
+					"$in": []string{"Engine"},
+				},
+				"manufacturer.country": bson.M{
+					"$in": []string{"Germany"},
+				},
+				"tags": bson.M{
+					"$in": []string{"engine"},
+				},
 			},
-			{
-				UUID:          "33333333-3333-3333-3333-333333333333",
-				Name:          "Иллюминатор квадратный",
-				Price:         600.0,
-				StockQuantity: 2,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  nil,
-				Tags:          nil,
-			},
-		}
-	)
-	s.repository.Init(context.Background())
+		},
+	}
 
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().ElementsMatch(expectedParts, parts)
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := buildMongoFilter(tt.filter)
 
-func (s *RepositorySuite) TestListParts_WithOnlyManufacturerCountriesInFilter() {
-	var (
-		partManufacturerCountries = []string{"Germany"}
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
 
-		filter = &model.PartsFilter{
-			ManufacturerCountries: partManufacturerCountries,
-		}
-
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
-
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
-			},
-			{
-				UUID:          "22222222-2222-2222-2222-222222222222",
-				Name:          "Иллюминатор стандартный",
-				Price:         300.0,
-				StockQuantity: 12,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"porthole", "window"},
-			},
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedParts, parts)
-}
-
-func (s *RepositorySuite) TestListParts_WithOnlyTagsInFilter() {
-	var (
-		partTags = []string{"engine", "window"}
-
-		filter = &model.PartsFilter{
-			Tags: partTags,
-		}
-
-		manufacturer = &model.Manufacturer{
-			Name:    "Biscuit",
-			Country: "Germany",
-			Website: "financialharness.info",
-		}
-
-		expectedParts = []*model.Part{
-			{
-				UUID:          "11111111-1111-1111-1111-111111111111",
-				Name:          "Сопло маршевое",
-				Price:         1500.0,
-				StockQuantity: 5,
-				Category:      model.CATEGORY_ENGINE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"engine", "main"},
-			},
-			{
-				UUID:          "22222222-2222-2222-2222-222222222222",
-				Name:          "Иллюминатор стандартный",
-				Price:         300.0,
-				StockQuantity: 12,
-				Category:      model.CATEGORY_PORTHOLE,
-				Manufacturer:  manufacturer,
-				Tags:          []string{"porthole", "window"},
-			},
-		}
-	)
-	s.repository.Init(context.Background())
-
-	parts, err := s.repository.ListParts(s.ctx, filter)
-	println(parts)
-	s.Require().NoError(err)
-	s.Require().ElementsMatch(expectedParts, parts)
+			require.NoError(t, err)
+			require.Equal(t, tt.want, got)
+		})
+	}
 }

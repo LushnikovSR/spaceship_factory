@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 )
@@ -22,7 +23,10 @@ func (s *service) GetOrder(ctx context.Context, orderUUID string) (model.Order, 
 			},
 		}
 	}
-	if order == nil {
+
+	empty := &model.Order{}
+
+	if reflect.DeepEqual(order, empty) || order == nil {
 		return model.Order{}, &model.NotFoundError{
 			BaseError: model.BaseError{
 				Code:    404,

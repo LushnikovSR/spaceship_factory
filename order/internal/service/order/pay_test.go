@@ -32,8 +32,8 @@ func (s *ServiceSuite) TestPayOrder_Success() {
 	)
 
 	s.orderRepository.
-		On("GetOrder", expectedOrderUUID).
-		Return(expectedOrder).
+		On("GetOrder", s.ctx, expectedOrderUUID).
+		Return(expectedOrder, nil).
 		Once()
 
 	s.paymentClient.
@@ -41,7 +41,9 @@ func (s *ServiceSuite) TestPayOrder_Success() {
 		Return(expectedTransactionUUID, nil).
 		Once()
 
-	s.orderRepository.On("UpdateOrder", mock.Anything)
+	s.orderRepository.On("UpdateOrder", s.ctx, mock.Anything).
+		Return(nil).
+		Once()
 
 	transactionUUID, err := s.service.PayOrder(s.ctx, expectedPaymentMethod, expectedOrderUUID)
 	s.Require().NoError(err)
@@ -52,7 +54,7 @@ func (s *ServiceSuite) TestPayOrder_Success() {
 func (s *ServiceSuite) TestPayOrder_RepoError() {
 	expectedPaymentMethod := model.PaymentMethodCARD
 
-	s.orderRepository.On("GetOrder", "not-exist").Return(nil).Once()
+	s.orderRepository.On("GetOrder", s.ctx, "not-exist").Return(&model.Order{}, nil).Once()
 
 	transactionUUID, err := s.service.PayOrder(s.ctx, expectedPaymentMethod, "not-exist")
 	s.Require().Error(err)
@@ -87,8 +89,8 @@ func (s *ServiceSuite) TestPayOrder_PaymentServiceError() {
 	)
 
 	s.orderRepository.
-		On("GetOrder", expectedOrderUUID).
-		Return(expectedOrder).
+		On("GetOrder", s.ctx, expectedOrderUUID).
+		Return(expectedOrder, nil).
 		Once()
 
 	s.paymentClient.

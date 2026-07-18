@@ -30,8 +30,8 @@ func (s *ServiceSuite) TestGetOrder_Success() {
 	)
 
 	s.orderRepository.
-		On("GetOrder", orderUUID).
-		Return(&expectOrder).
+		On("GetOrder", s.ctx, orderUUID).
+		Return(&expectOrder, nil).
 		Once()
 
 	order, err := s.service.GetOrder(s.ctx, orderUUID)
@@ -57,12 +57,11 @@ func (s *ServiceSuite) TestGetOrder_Success() {
 
 func (s *ServiceSuite) TestGetOrder_NotFoundError() {
 	s.orderRepository.
-		On("GetOrder", "not-exist").
-		Return(nil).
+		On("GetOrder", s.ctx, "not-exist").
+		Return(&model.Order{}, nil).
 		Once()
 
 	order, err := s.service.GetOrder(s.ctx, "not-exist")
-
 	s.Require().Error(err)
 	var notFoundError *model.NotFoundError
 	s.Require().ErrorAs(err, &notFoundError)

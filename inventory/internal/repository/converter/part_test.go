@@ -14,7 +14,15 @@ import (
 )
 
 func TestRepoModelToModel_EmptyInput(t *testing.T) {
-	assert.Empty(t, RepoModelToModel(repoModel.Part{}))
+	zeroTime := time.Time{}
+	expectedPart := &model.Part{
+		UUID:      "000000000000000000000000",
+		CreatedAt: &zeroTime,
+		UpdatedAt: &zeroTime,
+	}
+
+	result := RepoModelToModel(repoModel.Part{})
+	assert.Equal(t, expectedPart, result)
 }
 
 func TestRepoModelToModel_FullDataSuccess(t *testing.T) {
@@ -124,8 +132,6 @@ func TestRepoModelToModel_OnlyUUIDSuccess(t *testing.T) {
 	var (
 		randID = gofakeit.Regex("[0-9a-f]{24}")
 
-		expectedPart = &model.Part{}
-
 		part = repoModel.Part{}
 	)
 	partID, err := primitive.ObjectIDFromHex(randID)
@@ -134,7 +140,12 @@ func TestRepoModelToModel_OnlyUUIDSuccess(t *testing.T) {
 	}
 	part.ID = partID
 
-	expectedPart.UUID = partID.Hex()
+	zeroTime := time.Time{}
+	expectedPart := &model.Part{
+		UUID:      partID.Hex(),
+		CreatedAt: &zeroTime,
+		UpdatedAt: &zeroTime,
+	}
 
 	assert.Equal(t, RepoModelToModel(part), expectedPart)
 }

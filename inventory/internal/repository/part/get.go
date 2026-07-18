@@ -16,14 +16,14 @@ import (
 
 // GetByID gets a note by ID
 func (r *repository) GetPart(ctx context.Context, id string) (*model.Part, error) {
-	var part repoModel.Part
+	var repoPart repoModel.Part
 
 	objID, err := primitive.ObjectIDFromHex(id) // ObjectIDFromHex takes an argument of 24 characters in length
 	if err != nil {
 		return &model.Part{}, fmt.Errorf("invalid string format: %w", err)
 	}
 
-	err = r.data.FindOne(ctx, bson.M{"_id": objID}).Decode(&part)
+	err = r.data.FindOne(ctx, bson.M{"_id": objID}).Decode(&repoPart)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return &model.Part{}, model.ErrPartNotFound
@@ -32,5 +32,5 @@ func (r *repository) GetPart(ctx context.Context, id string) (*model.Part, error
 		return &model.Part{}, err
 	}
 
-	return converter.RepoModelToModel(part), nil
+	return converter.RepoModelToModel(repoPart), nil
 }

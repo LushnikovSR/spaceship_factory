@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/LushnikovSR/spaceship_factory/shared v0.0.0-20260627190843-c210485b755f
 	github.com/brianvoe/gofakeit/v7 v7.15.0
+	github.com/caarlos0/env/v11 v11.4.1
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.17.9
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/caarlos0/env/v11 v11.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect

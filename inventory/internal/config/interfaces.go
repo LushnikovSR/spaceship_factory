@@ -2,7 +2,7 @@ package inventory
 
 type LoggerConfig interface {
 	Level() string
-	AsJson() string
+	AsJson() bool
 }
 
 type InventoryGRPCConfig interface {

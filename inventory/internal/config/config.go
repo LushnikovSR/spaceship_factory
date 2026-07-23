@@ -5,7 +5,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/spaceship_factory/inventory/internal/config/env"
+	env "github.com/LushnikovSR/spaceship_factory/inventory/internal/config/env"
 )
 
 var appConfig *config

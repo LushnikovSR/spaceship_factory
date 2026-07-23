@@ -11,16 +11,19 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
 	apiV1 "github.com/LushnikovSR/spaceship_factory/inventory/internal/api/inventory/v1"
+	config "github.com/LushnikovSR/spaceship_factory/inventory/internal/config"
 	repository "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/part"
 	service "github.com/LushnikovSR/spaceship_factory/inventory/internal/service/part"
 	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -45,23 +48,21 @@ func panicRecoveryInterceptor() grpc.UnaryServerInterceptor {
 }
 
 func run() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
-	if err != nil {
-		return fmt.Errorf("failed to listen: %w", err)
-	}
-
-	s := grpc.NewServer(grpc.UnaryInterceptor(panicRecoveryInterceptor()))
-
 	// Контекст для подключения к MongoDB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := repository.ConnectMongo(ctx)
+	// Создаем клиент MongoDB
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(config.AppConfig().Mongo.URI()).
+		SetConnectTimeout(5*time.Second).
+		SetServerSelectionTimeout(5*time.Second))
 	if err != nil {
+		slog.Error("failed to connect to MongoDB", "error", err)
 		return fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
+
 	defer func() {
-		if cerr := client.Disconnect(context.Background()); cerr != nil {
+		if cerr := mongoClient.Disconnect(context.Background()); cerr != nil {
 			slog.Warn("MongoDB disconnect error", "error", cerr)
 		}
 	}()
@@ -69,13 +70,20 @@ func run() error {
 	// Пинг с отдельным коротким таймаутом
 	pingCtx, pingCancel := context.WithTimeout(ctx, 5*time.Second)
 	defer pingCancel()
-	if err := client.Ping(pingCtx, nil); err != nil {
+	if err := mongoClient.Ping(pingCtx, nil); err != nil {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	db := client.Database("inventory")
+	db := mongoClient.Database("inventory")
 	repo := repository.NewRepository(db)
 	repo.Init(ctx)
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	if err != nil {
+		return fmt.Errorf("failed to listen: %w", err)
+	}
+
+	s := grpc.NewServer(grpc.UnaryInterceptor(panicRecoveryInterceptor()))
 
 	svc := service.NewService(repo)
 	api := apiV1.NewAPI(svc)

@@ -78,7 +78,7 @@ func run() error {
 	repo := repository.NewRepository(db)
 	repo.Init(ctx)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	lis, err := net.Listen("tcp", config.AppConfig().InventoryGRPC.Address())
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
@@ -91,7 +91,7 @@ func run() error {
 	reflection.Register(s)
 
 	go func() {
-		slog.Info("gRPC server listening", "port", grpcPort)
+		slog.Info("gRPC server listening", "port", config.AppConfig().InventoryGRPC.Address())
 		if err := s.Serve(lis); err != nil {
 			slog.Error("failed to serve", "error", err)
 		}

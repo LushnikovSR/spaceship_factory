@@ -20,10 +20,12 @@ import (
 	repository "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/part"
 	service "github.com/LushnikovSR/spaceship_factory/inventory/internal/service/part"
 	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
+	"github.com/joho/godotenv"
 )
 
 const (
-	grpcPort = 50051
+	grpcPort   = 50051
+	configPath = "./deploy/compose/inventory/.env"
 )
 
 func panicRecoveryInterceptor() grpc.UnaryServerInterceptor {
@@ -97,6 +99,10 @@ func run() error {
 }
 
 func main() {
+	err := godotenv.Load(configPath)
+	if err != nil {
+		panic(fmt.Errorf("failed to load config: %w", err))
+	}
 	if err := run(); err != nil {
 		slog.Error("Application error", "error", err)
 		os.Exit(1)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -12,16 +11,13 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	apiV1 "github.com/LushnikovSR/spaceship_factory/payment/internal/api/payment/v1"
+	config "github.com/LushnikovSR/spaceship_factory/payment/internal/config"
 	service "github.com/LushnikovSR/spaceship_factory/payment/internal/service/payment"
 	payment_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/payment/v1"
 )
 
-const (
-	grpcPort = 50052
-)
-
 func main() {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	lis, err := net.Listen("tcp", config.AppConfig().PaymentGRPC.Address())
 	if err != nil {
 		slog.Error("failed to listen", "error", err)
 		os.Exit(1)
@@ -47,7 +43,7 @@ func main() {
 	reflection.Register(s)
 
 	go func() {
-		slog.Info("🚀 gRPC server listening", "port", grpcPort)
+		slog.Info("🚀 gRPC server listening", "port", config.AppConfig().PaymentGRPC.Address())
 		err = s.Serve(lis)
 		if err != nil {
 			slog.Error("failed to serve", "error", err)

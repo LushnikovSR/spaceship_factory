@@ -27,7 +27,6 @@ import (
 )
 
 const (
-	grpcPort   = 50051
 	configPath = "./deploy/compose/inventory/.env"
 )
 

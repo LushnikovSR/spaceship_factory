@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +15,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -23,6 +24,7 @@ import (
 	apiV1 "github.com/LushnikovSR/spaceship_factory/order/internal/api/order/v1"
 	inventoryClient "github.com/LushnikovSR/spaceship_factory/order/internal/client/grpc/inventory/v1"
 	paymentClient "github.com/LushnikovSR/spaceship_factory/order/internal/client/grpc/payment/v1"
+	config "github.com/LushnikovSR/spaceship_factory/order/internal/config"
 	repository "github.com/LushnikovSR/spaceship_factory/order/internal/repository/order"
 	service "github.com/LushnikovSR/spaceship_factory/order/internal/service/order"
 	orderV1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/openapi/order/v1"
@@ -31,28 +33,37 @@ import (
 )
 
 const (
-	httpPort             = "8080"
-	readHeaderTimeout    = 5 * time.Second
-	contextTimeout       = 10 * time.Second
-	inventoryServicePort = "50051"
-	paymentServicePort   = "50052"
+	contextTimeout = 10 * time.Second
+	configPath     = "./deploy/compose/order/.env"
 )
 
 func main() {
+	err := godotenv.Load(configPath)
+	if err != nil {
+		panic(fmt.Errorf("failed to load config: %w", err))
+	}
 	if err := run(); err != nil {
 		log.Fatalf("Application error: %v", err)
 	}
 }
 
 func run() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// Контекст для подключения к PostgreSQL
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
-	pool, err := repository.ConnectPostgres(ctx)
+	// Создаём соединение с базой данных
+	pool, err := pgxpool.New(ctx, config.AppConfig().Postgres.URI())
 	if err != nil {
-		return fmt.Errorf("failed to connect to database: %w", err)
+		return fmt.Errorf("failed to connect to postgres: %w", err)
 	}
 	defer pool.Close()
+
+	// Проверяем что соединение с базой данных установлено
+	err = pool.Ping(ctx)
+	if err != nil {
+		return fmt.Errorf("database is unavailable: %w", err)
+	}
 
 	// Создаём новое хранилище для данных о заказах
 	repo, err := repository.NewRepository(pool)
@@ -61,7 +72,7 @@ func run() error {
 	}
 
 	// gRPC подключение к InventoryService
-	connInv, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", inventoryServicePort),
+	connInv, err := grpc.NewClient(config.AppConfig().InventoryGRPC.Address(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return fmt.Errorf("failed to connect to InventoryService: %w", err)
@@ -74,7 +85,7 @@ func run() error {
 	invClient := inventory_v1.NewInventoryServiceClient(connInv)
 
 	// gRPC подключение к PaymentService
-	connPay, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", paymentServicePort),
+	connPay, err := grpc.NewClient(config.AppConfig().PaymentGRPC.Address(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return fmt.Errorf("failed to connect to PaymentService: %w", err)
@@ -111,14 +122,14 @@ func run() error {
 
 	// Запускаем http-сервер
 	server := &http.Server{
-		Addr:              net.JoinHostPort("localhost", httpPort),
+		Addr:              config.AppConfig().OrderHTTP.Address(),
 		Handler:           r,
-		ReadHeaderTimeout: readHeaderTimeout,
+		ReadHeaderTimeout: config.AppConfig().OrderHTTP.ReadTimeout(),
 	}
 
 	// Запускаем сервер в отдельной горутине
 	go func() {
-		log.Printf("Server is starting on port: %s\n", httpPort)
+		log.Printf("Server is starting on port: %s\n", config.AppConfig().OrderHTTP.Address())
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("failed to serve", "error", err)
 			os.Exit(1)

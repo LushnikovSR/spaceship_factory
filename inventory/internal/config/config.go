@@ -33,7 +33,7 @@ func Load(path ...string) error {
 
 	mongoCfg, err := env.NewMongoConfig()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	appConfig = &config{

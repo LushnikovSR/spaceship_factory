@@ -31,7 +31,7 @@ func NewPostrgresCOnfig() (*postgresConfig, error) {
 }
 
 func (cfg *postgresConfig) URI() string {
-	return fmt.Sprintf("mongodb//%s:%s@%s:%s/%s?sslmode=%s",
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.raw.User,
 		cfg.raw.Password,
 		cfg.raw.Host,

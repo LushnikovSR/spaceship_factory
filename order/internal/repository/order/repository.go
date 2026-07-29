@@ -30,7 +30,7 @@ func NewRepository(pool *pgxpool.Pool) (*repository, error) {
 	}()
 
 	// Инициализируем мигратор
-	migrationsDir := os.Getenv("MIGRATIONS_DIR")
+	migrationsDir := os.Getenv("MIGRATION_DIRECTORY")
 	migratorRunner := migrator.NewMigrator(db, migrationsDir)
 
 	err := migratorRunner.Up()

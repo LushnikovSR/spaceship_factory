@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -16,7 +17,16 @@ import (
 	payment_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/payment/v1"
 )
 
+const (
+	configPath = "./deploy/compose/payment/.env"
+)
+
 func main() {
+	err := config.Load(configPath)
+	if err != nil {
+		panic(fmt.Errorf("failed to load config: %w", err))
+	}
+
 	lis, err := net.Listen("tcp", config.AppConfig().PaymentGRPC.Address())
 	if err != nil {
 		slog.Error("failed to listen", "error", err)

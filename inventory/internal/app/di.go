@@ -56,7 +56,7 @@ func (d *diContainer) PartRepository(ctx context.Context) repository.PartReposit
 
 func (d *diContainer) MongoDBHandler(ctx context.Context) *mongo.Database {
 	if d.mongoDBHandler == nil {
-		d.mongoDBHandler = d.mongoDBClient.Database(config.AppConfig().Mongo.DatabaseName())
+		d.mongoDBHandler = d.MongoDBClient(ctx).Database(config.AppConfig().Mongo.DatabaseName())
 	}
 
 	return d.mongoDBHandler

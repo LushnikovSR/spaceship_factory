@@ -6,6 +6,8 @@ import (
 	"reflect"
 
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
+	logger "github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // GetOrder implements getOrder operation.
@@ -16,6 +18,7 @@ import (
 func (s *service) GetOrder(ctx context.Context, orderUUID string) (model.Order, error) {
 	order, err := s.orderRepository.GetOrder(ctx, orderUUID)
 	if err != nil {
+		logger.Error(ctx, "failed to get order", zap.String("orderUUID", orderUUID), zap.Error(err))
 		return model.Order{}, &model.InternalServerError{
 			BaseError: model.BaseError{
 				Code:    500,
@@ -27,6 +30,7 @@ func (s *service) GetOrder(ctx context.Context, orderUUID string) (model.Order, 
 	empty := &model.Order{}
 
 	if reflect.DeepEqual(order, empty) || order == nil {
+		logger.Error(ctx, "order was not found", zap.String("orderUUID", orderUUID), zap.Error(err))
 		return model.Order{}, &model.NotFoundError{
 			BaseError: model.BaseError{
 				Code:    404,

@@ -45,8 +45,8 @@ func Add(f ...func(ctx context.Context) error) {
 }
 
 //CloseAll инициирует процесс закрытия всех зарегистрированных функций закрытия глобального closer'а
-func CloseAll(ctx context.Context) {
-	globalCloser.CloseAll(ctx)
+func CloseAll(ctx context.Context) error {
+	return globalCloser.CloseAll(ctx)
 }
 
 //SetLogger позволяет установить кастомный логгер для глобального closer'а

@@ -677,3 +677,10 @@ tasks:
         done
         exit $ERR
 
+  e2e:test:inventory:
+    desc: "Запускает e2e тесты для Inventory сервиса"
+    dir: inventory/tests/integration
+    cmds:
+      - echo "🚀 Запуск e2e тестов Invenotry сервиса..."
+      - cd ../../ && go mod tidy
+      - go test -tags=integration -v ./...

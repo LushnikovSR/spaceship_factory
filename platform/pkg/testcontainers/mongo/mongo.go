@@ -52,6 +52,10 @@ func NewContainer(ctx context.Context, opts ...Option) (*Container, error) {
 		return nil, err
 	}
 
+	success = true
+
+	cfg.Logger.Info(ctx, "MongoDB container started (external port)", zap.String("uri", uri))
+
 	return &Container{
 		container: container,
 		client:    client,

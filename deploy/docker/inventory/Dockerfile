@@ -3,7 +3,7 @@
 # ============================
 
 # Используем официальный образ Go на базе Alpine — лёгкий, быстрый и безопасный
-FROM golang:1.24.2-alpine AS builder
+FROM golang:1.26.4-alpine AS builder
 
 # Устанавливаем git — нужен для загрузки зависимостей из приватных и публичных репозиториев
 RUN apk add --no-cache git
@@ -38,7 +38,7 @@ ADD https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.3
 RUN chmod +x grpc-health-probe
 
 # Собираем бинарный файл inventory-сервиса для Linux-архитектуры без CGO
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app-inventory ./inventory/cmd/grpc_server/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app-inventory ./inventory/cmd/main.go
 
 
 # ============================
@@ -47,6 +47,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app-inventory ./inventory/
 
 # Используем чистый Alpine образ как итоговый контейнер — он будет лёгким и безопасным
 FROM alpine:3.21.3
+
+# Создаём директорию для .env файла
+RUN mkdir -p deploy/compose/inventory
 
 # Создаём системного пользователя без root-прав — best practice для безопасности
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -64,7 +67,7 @@ COPY --from=builder /app/app-inventory .
 COPY --from=builder /app/grpc-health-probe /bin/grpc-health-probe
 
 # Копируем .env файл для конфигурации приложения
-COPY deploy/compose/inventory/.env .env
+COPY deploy/compose/inventory/.env deploy/compose/inventory/.env
 
 # Экспонируем порт gRPC-сервиса inventory
 EXPOSE 50051

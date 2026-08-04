@@ -13,7 +13,7 @@ func GetProjectRoot() string {
 	}
 
 	for {
-		_, err := os.Stat(filepath.Join(dir, "go.mod"))
+		_, err := os.Stat(filepath.Join(dir, "go.work"))
 		if err == nil {
 			return dir
 		}

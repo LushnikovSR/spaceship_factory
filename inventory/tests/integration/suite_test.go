@@ -41,7 +41,7 @@ var _ = BeforeSuite(func() {
 	suiteCtx, suiteCancel = context.WithTimeout(context.Background(), testTimeout)
 
 	// Загружаем .env файл и устанавливаем переменные в окружение
-	envVars, err := godotenv.Read(filepath.Join("..", "..", "deploy", "compose", "inventory", ".env"))
+	envVars, err := godotenv.Read(filepath.Join("..", "..", "..", "deploy", "compose", "inventory", ".env"))
 	if err != nil {
 		logger.Fatal(suiteCtx, "не удалось загрузить .env файл", zap.Error(err))
 	}

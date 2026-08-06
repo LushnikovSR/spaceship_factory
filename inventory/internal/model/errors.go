@@ -1,4 +1,4 @@
-package inventory
+package model
 
 import (
 	"google.golang.org/grpc/codes"

@@ -14,29 +14,51 @@ import (
 	repoModel "github.com/LushnikovSR/spaceship_factory/inventory/internal/repository/model"
 )
 
+var (
+	testPart = repoModel.Part{
+		Name:          "Testing part",
+		Description:   "Testing description",
+		Price:         4999.89,
+		StockQuantity: 19,
+		Category:      repoModel.Category(0),
+		Dimensions: &repoModel.Dimensions{
+			Length: 10,
+			Width:  20,
+			Height: 30,
+			Weight: 40,
+		},
+		Manufacturer: &repoModel.Manufacturer{
+			Name:    "TestName",
+			Country: "TestCountry",
+			Website: "testwebsite.test",
+		},
+		Tags:      []string{"test", "main"},
+		Metadata:  make(map[string]interface{}),
+		CreatedAt: time.Now(),
+	}
+)
+
 // InsertTestPart - вставляет тестовую запчасть в коллекцию Mongo и возвращает UUID
 func (env *TestEnvironment) InsertTestPart(ctx context.Context) (string, error) {
-	now := time.Now()
-
 	partDoc := bson.M{
-		"name":           "Testing part",
-		"description":    "Testing description",
-		"price":          4999.89,
-		"stock_quantity": 19,
-		"category":       repoModel.CATEGORY_UNSPECIFIED,
+		"name":           testPart.Name,
+		"description":    testPart.Description,
+		"price":          testPart.Price,
+		"stock_quantity": testPart.StockQuantity,
+		"category":       testPart.Category,
 		"dimensions": bson.M{
-			"length": 10,
-			"width":  20,
-			"height": 30,
-			"weight": 40,
+			"length": testPart.Dimensions.Length,
+			"width":  testPart.Dimensions.Width,
+			"height": testPart.Dimensions.Height,
+			"weight": testPart.Dimensions.Weight,
 		},
 		"manufacturer": bson.M{
-			"name":    "TestName",
-			"country": "TestCounty",
-			"website": "testwebsite.test",
+			"name":    testPart.Manufacturer.Name,
+			"country": testPart.Manufacturer.Country,
+			"website": testPart.Manufacturer.Website,
 		},
-		"tags":       []string{"engine", "main"},
-		"created_at": primitive.NewDateTimeFromTime(now),
+		"tags":       testPart.Tags,
+		"created_at": testPart.CreatedAt,
 	}
 
 	// Используем базу данных из переменной окружения MONGO_DATABASE
@@ -61,9 +83,29 @@ func (env *TestEnvironment) InsertTestPart(ctx context.Context) (string, error) 
 	return idString, nil
 }
 
-// InsertTestPartWithData — вставляет тестовое запчасть с заданными данными
+// InsertTestPartWithData — вставляет тестовую запчасть с заданными данными в коллекцию Mongo и возвращает uuid
 func (env *TestEnvironment) InsertTestPartWithData(ctx context.Context, part repoModel.Part) (string, error) {
 	now := time.Now()
+	var dimention map[string]interface{}
+
+	if part.Dimensions != nil {
+		dimention = bson.M{
+			"length": "",
+			"width":  "",
+			"height": part.Dimensions.Height,
+			"weight": part.Dimensions.Weight,
+		}
+	}
+
+	var manufacturer map[string]interface{}
+
+	if part.Manufacturer != nil {
+		manufacturer = bson.M{
+			"name":    part.Manufacturer.Name,
+			"country": part.Manufacturer.Country,
+			"website": part.Manufacturer.Website,
+		}
+	}
 
 	partDoc := bson.M{
 		"name":           part.Name,
@@ -71,19 +113,10 @@ func (env *TestEnvironment) InsertTestPartWithData(ctx context.Context, part rep
 		"price":          part.Price,
 		"stock_quantity": part.StockQuantity,
 		"category":       part.Category,
-		"dimensions": bson.M{
-			"length": part.Dimensions.Length,
-			"width":  part.Dimensions.Width,
-			"height": part.Dimensions.Height,
-			"weight": part.Dimensions.Weight,
-		},
-		"manufacturer": bson.M{
-			"name":    part.Manufacturer.Name,
-			"country": part.Manufacturer.Country,
-			"website": part.Manufacturer.Website,
-		},
-		"tags":       part.Tags,
-		"created_at": primitive.NewDateTimeFromTime(now),
+		"dimensions":     dimention,
+		"manufacturer":   manufacturer,
+		"tags":           part.Tags,
+		"created_at":     primitive.NewDateTimeFromTime(now),
 	}
 
 	// Используем базу данных из переменной окружения MONGO_DATABASE
@@ -109,6 +142,20 @@ func (env *TestEnvironment) InsertTestPartWithData(ctx context.Context, part rep
 }
 
 // GetTestPartInfo — возвращает тестовую информацию о запчасте
+func (env *TestEnvironment) GetTestPart() *repoModel.Part {
+	return &repoModel.Part{
+		Name:          testPart.Name,
+		Description:   testPart.Description,
+		Price:         testPart.Price,
+		StockQuantity: testPart.StockQuantity,
+		Category:      testPart.Category,
+		Dimensions:    testPart.Dimensions,
+		Manufacturer:  testPart.Manufacturer,
+		Tags:          testPart.Tags,
+		Metadata:      testPart.Metadata,
+		CreatedAt:     testPart.CreatedAt,
+	}
+}
 
 // GetUpdatedParInfo — возвращает обновленную информацию о запчасте
 

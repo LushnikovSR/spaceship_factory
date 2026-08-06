@@ -54,9 +54,9 @@ func buildMongoFilter(filter *model.PartsFilter) (bson.M, error) {
 
 	// Категории
 	if len(filter.Categories) > 0 {
-		categories := make([]string, len(filter.Categories))
+		categories := make([]int32, len(filter.Categories))
 		for i, c := range filter.Categories {
-			categories[i] = string(c)
+			categories[i] = int32(c)
 		}
 
 		mongoFilter["category"] = bson.M{

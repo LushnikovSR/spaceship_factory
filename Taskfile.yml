@@ -658,21 +658,16 @@ tasks:
     cmds:
       - |
         ERR=0
-        echo "🚀 Запуск интеграционных тестов (по тегу integration) для модулей: {{.MODULES}}"
+        echo "🚀 Запуск интеграционных тестов для модулей: {{.MODULES}}"
         for mod in {{.MODULES}}; do
           if [ -d "$mod" ]; then
-            echo "🧪 Проверка модуля $mod на наличие интеграционных тестов"
-            
-            # Проверяем наличие файлов с тегом integration
-            HAS_TESTS=$(grep -r "//go:build integration" $mod --include="*.go" | wc -l)
-            
-            if [ "$HAS_TESTS" -eq 0 ]; then
-              echo "⚠️ Модуль $mod не содержит интеграционных тестов (с тегом integration), пропускаем"
-              continue
+            INTEG_DIR="$mod/tests/integration"
+            if [ -d "$INTEG_DIR" ]; then
+              echo "▶️ Запуск интеграционных тестов для $mod"
+              go test -v -tags=integration ./"$INTEG_DIR"/... || ERR=1
+            else
+              echo "⚠️ Модуль $mod не содержит директории tests/integration, пропускаем"
             fi
-            
-            echo "▶️ Запуск интеграционных тестов для $mod"
-            go test -v -tags=integration ./$mod/... || ERR=1
           fi
         done
         exit $ERR

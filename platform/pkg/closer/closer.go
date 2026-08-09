@@ -14,7 +14,7 @@ import (
 	logger "github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
 )
 
-//shutdownTimeout по умолчанию, можно сделать пораметром
+// shutdownTimeout по умолчанию, можно сделать пораметром
 const shutdownTimeout = 5 * time.Second
 
 type Logger interface {
@@ -22,7 +22,7 @@ type Logger interface {
 	Error(ctx context.Context, msg string, fields ...zap.Field)
 }
 
-//Closer управляет процессом graceful shutdown приложения
+// Closer управляет процессом graceful shutdown приложения
 type Closer struct {
 	mu     sync.Mutex                    // Защита от гонки при добавлении функций
 	once   sync.Once                     // Гарантия однократного вызова Closer
@@ -31,41 +31,41 @@ type Closer struct {
 	logger Logger                        // Используемый логгер
 }
 
-//Глобальный экземпляр для использования по всему приложению
+// Глобальный экземпляр для использования по всему приложению
 var globalCloser = NewWithLogger(&logger.NoopLogger{})
 
-//AddNamed добавляет функцию закрытия с именем зависимости для логгирования глобального closer'а
+// AddNamed добавляет функцию закрытия с именем зависимости для логгирования глобального closer'а
 func AddNamed(name string, f func(ctx context.Context) error) {
 	globalCloser.AddNamed(name, f)
 }
 
-//Add добавляет одну или несколько функций закрытия в глобальный closer
+// Add добавляет одну или несколько функций закрытия в глобальный closer
 func Add(f ...func(ctx context.Context) error) {
 	globalCloser.Add(f...)
 }
 
-//CloseAll инициирует процесс закрытия всех зарегистрированных функций закрытия глобального closer'а
+// CloseAll инициирует процесс закрытия всех зарегистрированных функций закрытия глобального closer'а
 func CloseAll(ctx context.Context) error {
 	return globalCloser.CloseAll(ctx)
 }
 
-//SetLogger позволяет установить кастомный логгер для глобального closer'а
+// SetLogger позволяет установить кастомный логгер для глобального closer'а
 func SetLogger(l Logger) {
 	globalCloser.SetLogger(l)
 }
 
-//Configure настраивает глобальный closer для обработки системных сигналов
+// Configure настраивает глобальный closer для обработки системных сигналов
 func Configure(signals ...os.Signal) {
 	go globalCloser.handleSignals(signals...)
 }
 
-//New создаёт новый экземпляр Closer с дефолтным логгером log.Default()
+// New создаёт новый экземпляр Closer с дефолтным логгером log.Default()
 func New(signals ...os.Signal) *Closer {
 	return NewWithLogger(logger.Logger(), signals...)
 }
 
-//NewWithLogger создаёт новый экземпляр Closer с указанием логгера.
-//Если переданы сигналы, Closer начинает их слушать и вызывает CloseAll
+// NewWithLogger создаёт новый экземпляр Closer с указанием логгера.
+// Если переданы сигналы, Closer начинает их слушать и вызывает CloseAll
 func NewWithLogger(logger Logger, signals ...os.Signal) *Closer {
 	c := &Closer{
 		done:   make(chan struct{}),
@@ -79,12 +79,12 @@ func NewWithLogger(logger Logger, signals ...os.Signal) *Closer {
 	return c
 }
 
-//SetLogger устанавливает логгер для closer
+// SetLogger устанавливает логгер для closer
 func (c *Closer) SetLogger(l Logger) {
 	c.logger = l
 }
 
-//handleSignals обрабатывает системные сигналы и вызывает CloseAll с fresh shutdown context
+// handleSignals обрабатывает системные сигналы и вызывает CloseAll с fresh shutdown context
 func (c *Closer) handleSignals(signals ...os.Signal) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, signals...)
@@ -105,7 +105,7 @@ func (c *Closer) handleSignals(signals ...os.Signal) {
 	}
 }
 
-//AddNamed добавляет функцию закрытия с именем для логгирования
+// AddNamed добавляет функцию закрытия с именем для логгирования
 func (c *Closer) AddNamed(name string, f func(ctx context.Context) error) {
 	c.Add(func(ctx context.Context) error {
 		start := time.Now()
@@ -123,7 +123,7 @@ func (c *Closer) AddNamed(name string, f func(ctx context.Context) error) {
 	})
 }
 
-//Add добавляет одну или несколько функций закрытия
+// Add добавляет одну или несколько функций закрытия
 func (c *Closer) Add(f ...func(ctx context.Context) error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()

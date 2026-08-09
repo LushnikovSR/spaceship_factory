@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"reflect"
 
+	"go.uber.org/zap"
+
 	model "github.com/LushnikovSR/spaceship_factory/order/internal/model"
 	logger "github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
-	"go.uber.org/zap"
 )
 
 // GetOrder implements getOrder operation.

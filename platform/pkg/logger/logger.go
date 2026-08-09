@@ -17,19 +17,19 @@ const (
 	userIDKey  Key = "user ID"
 )
 
-//Глобальный singlton logger
+// Глобальный singlton logger
 var (
 	globalLogger *logger
 	initOnce     sync.Once
 	dynamicLevel zap.AtomicLevel
 )
 
-//logger обёртка над zap.Logger с enrich поддержкой контекста
+// logger обёртка над zap.Logger с enrich поддержкой контекста
 type logger struct {
 	zapLogger *zap.Logger
 }
 
-//Init инициализирует глобальный логгер
+// Init инициализирует глобальный логгер
 func Init(levelStr string, asJSON bool) error {
 	initOnce.Do(func() {
 		dynamicLevel = zap.NewAtomicLevelAt(parseLevel(levelStr))

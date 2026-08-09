@@ -8,12 +8,13 @@ import (
 	"net"
 	"time"
 
-	"github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
 	"github.com/docker/go-connections/nat"
 	"github.com/moby/moby/api/types/container"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"go.uber.org/zap"
+
+	"github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
 )
 
 const (
@@ -103,7 +104,6 @@ func NewContainer(ctx context.Context, opts ...Option) (*Container, error) {
 		externalPort: mappedPort.Port(),
 		cfg:          cfg,
 	}, nil
-
 }
 
 func (c *Container) Address() string {

@@ -100,7 +100,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 
 	reflection.Register(a.grpcServer)
 
-	//Регистрируем health сервер для проверки работоспособности
+	// Регистрируем health сервер для проверки работоспособности
 	health.RegisterService(a.grpcServer)
 
 	inventoryV1.RegisterInventoryServiceServer(a.grpcServer, a.diContainer.InventoryV1API(ctx))

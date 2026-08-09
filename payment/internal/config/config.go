@@ -3,8 +3,9 @@ package payment
 import (
 	"os"
 
-	env "github.com/LushnikovSR/spaceship_factory/payment/internal/config/env"
 	"github.com/joho/godotenv"
+
+	env "github.com/LushnikovSR/spaceship_factory/payment/internal/config/env"
 )
 
 var appConfig *config

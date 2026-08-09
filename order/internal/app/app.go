@@ -86,7 +86,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	}
 
 	closer.AddNamed("HTTP server", func(ctx context.Context) error {
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 		return a.httpServer.Shutdown(shutdownCtx)
 	})

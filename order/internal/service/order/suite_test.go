@@ -12,9 +12,7 @@ import (
 	"github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
 )
 
-var (
-	loggerLevelValue = "debug"
-)
+var loggerLevelValue = "debug"
 
 type ServiceSuite struct {
 	suite.Suite

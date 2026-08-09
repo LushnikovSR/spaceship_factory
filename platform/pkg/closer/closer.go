@@ -150,14 +150,14 @@ func (c *Closer) CloseAll(ctx context.Context) error {
 		errCh := make(chan error, len(funcs))
 		var wg sync.WaitGroup
 
-		//Выполняем функции отмены в обратном порядке
+		// Выполняем функции отмены в обратном порядке
 		for i := len(funcs) - 1; i >= 0; i-- {
 			f := funcs[i]
 			wg.Add(1)
 			go func(f func(ctx context.Context) error) {
 				defer wg.Done()
 
-				//Защита от паники
+				// Защита от паники
 				defer func() {
 					if r := recover(); r != nil {
 						errCh <- errors.New("panic recovered in closer")
@@ -177,7 +177,7 @@ func (c *Closer) CloseAll(ctx context.Context) error {
 			wg.Wait()
 		}()
 
-		//Читаем ошибки или отмену контекста
+		// Читаем ошибки или отмену контекста
 		select {
 		case <-ctx.Done():
 			c.logger.Info(ctx, "⚠️ Контекст отменён во время закрытия", zap.Error(ctx.Err()))

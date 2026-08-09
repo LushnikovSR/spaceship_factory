@@ -1,24 +1,23 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log/slog"
-	"net"
-	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"go.uber.org/zap"
 
-	apiV1 "github.com/LushnikovSR/spaceship_factory/payment/internal/api/payment/v1"
+	"github.com/LushnikovSR/spaceship_factory/payment/internal/app"
 	config "github.com/LushnikovSR/spaceship_factory/payment/internal/config"
-	service "github.com/LushnikovSR/spaceship_factory/payment/internal/service/payment"
-	payment_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/payment/v1"
+	"github.com/LushnikovSR/spaceship_factory/platform/pkg/closer"
+	"github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
 )
 
 const (
-	configPath = "./deploy/compose/payment/.env"
+	shutdownTimeout = 5 * time.Second
+	configPath      = "./deploy/compose/payment/.env"
 )
 
 func main() {
@@ -27,45 +26,30 @@ func main() {
 		panic(fmt.Errorf("failed to load config: %w", err))
 	}
 
-	lis, err := net.Listen("tcp", config.AppConfig().PaymentGRPC.Address())
+	appCtx, appCancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer appCancel()
+	defer gracefullShutdown()
+
+	closer.Configure(syscall.SIGINT, syscall.SIGTERM)
+
+	a, err := app.New(appCtx)
 	if err != nil {
-		slog.Error("failed to listen", "error", err)
-		os.Exit(1)
+		logger.Error(appCtx, "❌ Не удалось создать приложение", zap.Error(err))
+		return
 	}
 
-	defer func() {
-		err := lis.Close()
-		if err != nil {
-			slog.Error("failed to close listener", "error", err)
-		}
-	}()
+	err = a.Run(appCtx)
+	if err != nil {
+		logger.Error(appCtx, "❌ Ошибка при работе приложения", zap.Error(err))
+	}
+}
 
-	// Создаем gRPC сервер
-	s := grpc.NewServer()
+func gracefullShutdown() {
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
 
-	// Регистрируем наш сервис
-	service := service.NewService()
-	api := apiV1.NewAPI(service)
-
-	payment_v1.RegisterPaymentServiceServer(s, api)
-
-	// Включаем рефлексию для отладки
-	reflection.Register(s)
-
-	go func() {
-		slog.Info("🚀 gRPC server listening", "port", config.AppConfig().PaymentGRPC.Address())
-		err = s.Serve(lis)
-		if err != nil {
-			slog.Error("failed to serve", "error", err)
-			os.Exit(1)
-		}
-	}()
-
-	// Graceful shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	slog.Info("🛑 Shutting down gRPC server...")
-	s.GracefulStop()
-	slog.Info("✅ Server stopped")
+	err := closer.CloseAll(ctx)
+	if err != nil {
+		logger.Error(ctx, "❌ Ошибка при завершении работы", zap.Error(err))
+	}
 }

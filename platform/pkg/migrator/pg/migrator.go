@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pressly/goose/v3"
 	"go.uber.org/zap"
 
 	"github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
-	"github.com/pressly/goose/v3"
 )
 
 type Migrator struct {

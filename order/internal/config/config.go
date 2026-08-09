@@ -29,7 +29,7 @@ func Load(paths ...string) error {
 		return err
 	}
 
-	postgresCfg, err := env.NewPostrgresCOnfig()
+	postgresCfg, err := env.NewPostrgresConfig()
 	if err != nil {
 		return err
 	}

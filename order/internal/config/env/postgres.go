@@ -8,19 +8,20 @@ import (
 )
 
 type postgresEnvConfig struct {
-	Host     string `env:"POSTGRES_HOST,required"`
-	Port     string `env:"POSTGRES_PORT,required"`
-	User     string `env:"POSTGRES_USER,required"`
-	Password string `env:"POSTGRES_PASSWORD,required"`
-	Database string `env:"POSTGRES_DB,required"`
-	SSLMode  string `env:"POSTGRES_SSL_MODE,required"`
+	Host         string `env:"POSTGRES_HOST,required"`
+	Port         string `env:"POSTGRES_PORT,required"`
+	User         string `env:"POSTGRES_USER,required"`
+	Password     string `env:"POSTGRES_PASSWORD,required"`
+	Database     string `env:"POSTGRES_DB,required"`
+	SSLMode      string `env:"POSTGRES_SSL_MODE,required"`
+	MigrationDir string `env:"MIGRATION_DIRECTORY"`
 }
 
 type postgresConfig struct {
 	raw postgresEnvConfig
 }
 
-func NewPostrgresCOnfig() (*postgresConfig, error) {
+func NewPostrgresConfig() (*postgresConfig, error) {
 	var raw postgresEnvConfig
 	err := env.Parse(&raw)
 	if err != nil {
@@ -47,4 +48,8 @@ func (cfg *postgresConfig) Address() string {
 
 func (cfg *postgresConfig) DatabaseName() string {
 	return cfg.raw.Database
+}
+
+func (cfg *postgresConfig) MigrationDir() string {
+	return cfg.raw.MigrationDir
 }

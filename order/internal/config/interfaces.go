@@ -10,6 +10,7 @@ type LoggerConfig interface {
 type PostgresConfig interface {
 	URI() string
 	DatabaseName() string
+	MigrationDir() string
 }
 
 type PaymentGRPCConfig interface {

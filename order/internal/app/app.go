@@ -29,7 +29,13 @@ func New(ctx context.Context) (*App, error) {
 }
 
 func (a *App) Run(ctx context.Context) error {
-	return a.runHTTPServer(ctx)
+	var err error
+	err = a.runHTTPServer(ctx)
+	if err != nil {
+		return err
+	}
+	err = a.runPGMigrator(ctx)
+	return err
 }
 
 func (a *App) initDeps(ctx context.Context) error {
@@ -86,6 +92,10 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	})
 
 	return nil
+}
+
+func (a *App) runPGMigrator(ctx context.Context) error {
+	return a.diContainer.pgMigrator.Run(ctx)
 }
 
 func (a *App) runHTTPServer(ctx context.Context) error {

@@ -92,7 +92,7 @@ func (c *Closer) handleSignals(signals ...os.Signal) {
 
 	select {
 	case <-ch:
-		c.logger.Info(context.Background(), "🛑 Получен системный сигнел, начинаем gracefull shutdown...")
+		c.logger.Info(context.Background(), "🛑 Получен системный сигнал, начинаем gracefull shutdown...")
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer shutdownCancel()
 

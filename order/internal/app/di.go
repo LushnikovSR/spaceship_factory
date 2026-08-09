@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -25,6 +26,7 @@ import (
 	serviceOrder "github.com/LushnikovSR/spaceship_factory/order/internal/service/order"
 	"github.com/LushnikovSR/spaceship_factory/platform/pkg/closer"
 	"github.com/LushnikovSR/spaceship_factory/platform/pkg/logger"
+	pgmigrator "github.com/LushnikovSR/spaceship_factory/platform/pkg/migrator/pg"
 	orderV1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/openapi/order/v1"
 	inventory_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/inventory/v1"
 	payment_v1 "github.com/LushnikovSR/spaceship_factory/shared/pkg/proto/payment/v1"
@@ -43,6 +45,7 @@ type diContainer struct {
 	paymentGRPCClient   grpcClient.PaymentClient
 	chiRouter           chi.Router
 	orderServer         http.Handler
+	pgMigrator          *pgmigrator.Migrator
 }
 
 func NewDiContainer() *diContainer {
@@ -158,4 +161,13 @@ func (d *diContainer) OrderServer(ctx context.Context) http.Handler {
 		d.orderServer = orderServer
 	}
 	return d.orderServer
+}
+
+func (d *diContainer) PGMigrator() {
+	db := stdlib.OpenDB(*d.pgxpoolClient.Config().ConnConfig.Copy())
+	d.pgMigrator = pgmigrator.Init(db, config.AppConfig().Postgres.MigrationDir())
+
+	closer.AddNamed("pgMigrator", func(ctx context.Context) error {
+		return db.Close()
+	})
 }

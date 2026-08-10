@@ -14,7 +14,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	customMiddleware "github.com/LushnikovSR/spaceship_factory/internal/middleware"
 	apiOrderV1 "github.com/LushnikovSR/spaceship_factory/order/internal/api/order/v1"
 	grpcClient "github.com/LushnikovSR/spaceship_factory/order/internal/client/grpc"
 	inventoryClient "github.com/LushnikovSR/spaceship_factory/order/internal/client/grpc/inventory/v1"
@@ -129,6 +128,9 @@ func (d *diContainer) PgxpoolClient(ctx context.Context) *pgxpool.Pool {
 		})
 		d.pgxpoolClient = pool
 	}
+
+	d.PGMigrator()
+
 	return d.pgxpoolClient
 }
 
@@ -139,7 +141,6 @@ func (d *diContainer) ChiRouter(ctx context.Context) chi.Router {
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.Timeout(10 * time.Second))
 		r.Use(render.SetContentType(render.ContentTypeJSON))
-		r.Use(customMiddleware.RequestLogger)
 
 		orderServer := d.OrderServer(ctx)
 		r.Mount("/", orderServer)

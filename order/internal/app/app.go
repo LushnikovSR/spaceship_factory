@@ -73,7 +73,7 @@ func (a *App) initCloser(ctx context.Context) error {
 }
 
 func (a *App) initHTTPServer(ctx context.Context) error {
-	router := a.diContainer.chiRouter
+	router := a.diContainer.ChiRouter(ctx)
 	if router == nil {
 		return fmt.Errorf("chi router is nill")
 	}

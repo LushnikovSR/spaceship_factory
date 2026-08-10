@@ -97,7 +97,7 @@ func (a *App) initListener(_ context.Context) error {
 	return nil
 }
 
-func (a *App) initGRPCServer(_ context.Context) error {
+func (a *App) initGRPCServer(ctx context.Context) error {
 	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
 	closer.AddNamed("GRPCServer", func(ctx context.Context) error {
 		a.grpcServer.GracefulStop()
@@ -108,7 +108,7 @@ func (a *App) initGRPCServer(_ context.Context) error {
 
 	health.RegisterService(a.grpcServer)
 
-	paymentV1.RegisterPaymentServiceServer(a.grpcServer, a.diContainer.paymentV1API)
+	paymentV1.RegisterPaymentServiceServer(a.grpcServer, a.diContainer.PaymentV1API(ctx))
 
 	return nil
 }

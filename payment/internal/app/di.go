@@ -19,15 +19,15 @@ func NewDiContainer() *diContainer {
 }
 
 func (d *diContainer) PaymentV1API(ctx context.Context) paymentV1.PaymentServiceServer {
-	if d.paymentV1API != nil {
-		d.paymentV1API = apiPaymentV1.NewAPI(d.paymentService)
+	if d.paymentV1API == nil {
+		d.paymentV1API = apiPaymentV1.NewAPI(d.PaymentService(ctx))
 	}
 
 	return d.paymentV1API
 }
 
 func (d *diContainer) PaymentService(ctx context.Context) service.PaymentService {
-	if d.paymentService != nil {
+	if d.paymentService == nil {
 		d.paymentService = servicePayment.NewService()
 	}
 

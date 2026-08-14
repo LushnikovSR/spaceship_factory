@@ -38,7 +38,7 @@ func (r *repository) UpdateOrder(ctx context.Context, order *model.Order) error 
 	if err != nil {
 		return fmt.Errorf("failed to update note: %w", err)
 	}
-	slog.Info("\nfor id %s updated %d rows\n", order.OrderUUID, res.RowsAffected())
+	slog.Info("updated", slog.Int64("rows", res.RowsAffected()), slog.String("id", order.OrderUUID))
 
 	return nil
 }
